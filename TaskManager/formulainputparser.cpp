@@ -5,3 +5,8 @@ FormulaInputParser::FormulaInputParser(QObject *parent)
 {
 
 }
+
+void FormulaInputParser::processFormulaFile(QFile &)
+{
+
+}

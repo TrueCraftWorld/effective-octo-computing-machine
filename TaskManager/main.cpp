@@ -3,6 +3,10 @@
 #include <QHostAddress>
 #include <QFile>
 
+#include "datainputparser.h"
+#include "formulainputparser.h"
+#include "networklayer.h"
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -15,8 +19,12 @@ int main(int argc, char *argv[])
             QString("<path> to file with data to compute"),
              QString("path"));
 
-    QCommandLineOption outputFilePath(QStringList() << "o" << "output",
+    QCommandLineOption formulaFilePath(QStringList() << "o" << "output",
             QString("<path> to file to save computed data"),
+             QString("path"));
+
+    QCommandLineOption outputFilePath(QStringList() << "f" << "formula",
+            QString("<path> to file to read formula from"),
              QString("path"));
 
     QCommandLineOption nodeAddressLine(QStringList() << "n" << "node_IP",
@@ -29,6 +37,7 @@ int main(int argc, char *argv[])
 
     parser.addOption(inputFilePath);
     parser.addOption(outputFilePath);
+    parser.addOption(formulaFilePath);
     parser.addOption(nodeAddressLine);
     parser.addOption(nodePortLine);
 
@@ -37,7 +46,24 @@ int main(int argc, char *argv[])
     QHostAddress nodeIP(parser.value(nodeAddressLine));
     quint16 nodePort(parser.value(nodePortLine));
     QFile inputFile(parser.value(inputFilePath));
+    QFile formulaFile(parser.value(formulaFilePath));
     QFile outputFile(parser.value(outputFilePath));
+
+    DataInputParser inputData;
+    NetworkLayer netConnect;
+    FormulaInputParser formula;
+
+    QObject::connect(&inputData, &DataInputParser::dataReady, &netConnect, &NetworkLayer::sendData);
+    QObject::connect(&formula, &FormulaInputParser::formulaReady, &netConnect, &NetworkLayer::sendData);
+
+    netConnect.connectTo(nodeIP, nodePort);
+
+    formula.processFormulaFile(formulaFile);
+
+    inputData.processFile(inputFile);
+
+
+
 
 
     return a.exec();

@@ -5,3 +5,8 @@ DataInputParser::DataInputParser(QObject *parent)
 {
 
 }
+
+void DataInputParser::processFile(QFile &)
+{
+
+}

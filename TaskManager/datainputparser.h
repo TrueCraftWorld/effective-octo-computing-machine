@@ -2,6 +2,7 @@
 #define DATAINPUTPARSER_H
 
 #include <QObject>
+#include <QFile>
 
 
 class DataInputParser : public QObject

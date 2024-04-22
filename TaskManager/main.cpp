@@ -41,10 +41,10 @@ int main(int argc, char *argv[])
     parser.addOption(nodeAddressLine);
     parser.addOption(nodePortLine);
 
-    parser.process(app);
+    parser.process(a);
 
     QHostAddress nodeIP(parser.value(nodeAddressLine));
-    quint16 nodePort(parser.value(nodePortLine));
+    quint16 nodePort(parser.value(nodePortLine).toInt());
     QFile inputFile(parser.value(inputFilePath));
     QFile formulaFile(parser.value(formulaFilePath));
     QFile outputFile(parser.value(outputFilePath));

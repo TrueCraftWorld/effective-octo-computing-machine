@@ -1,4 +1,5 @@
 #include "datainputparser.h"
+#include "networklayer.h"
 
 #include <QFile>
 #include <QTextStream>
@@ -22,5 +23,5 @@ void DataInputParser::processFile(QFile & someFile)
         stream << line.toDouble();
     }
     stream >> m_data;
-    emit dataReady(m_data);
+    emit dataReady(m_data, DATA_IN);
 }

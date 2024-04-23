@@ -1,4 +1,5 @@
 #include "formulainputparser.h"
+#include "networklayer.h"
 #include <QFile>
 #include <QTextStream>
 #include <QByteArray>
@@ -46,5 +47,5 @@ void FormulaInputParser::processFormulaFile(QFile & someFile)
     }
     stream << END;
     stream >> m_action;
-    emit formulaReady(m_action);
+    emit formulaReady(m_action, FORMULA);
 }

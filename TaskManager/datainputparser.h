@@ -5,6 +5,7 @@
 #include <QFile>
 
 
+
 class DataInputParser : public QObject
 {
     Q_OBJECT
@@ -12,7 +13,7 @@ public:
     explicit DataInputParser(QObject *parent = nullptr);
     void processFile(QFile&);
 signals:
-    void dataReady(QByteArray&);
+    void dataReady(QByteArray&, char);
 private:
     QByteArray m_data;
 };

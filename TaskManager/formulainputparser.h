@@ -20,6 +20,8 @@ constexpr char CTAN = 0x09;
 constexpr char DIV = 0x0A;
 constexpr char END = 0x0B;
 
+
+
 class FormulaInputParser : public QObject
 {
     Q_OBJECT
@@ -27,7 +29,7 @@ public:
     explicit FormulaInputParser(QObject *parent = nullptr);
     void processFormulaFile(QFile&);
 signals:
-    void formulaReady(QByteArray& );
+    void formulaReady(QByteArray& , char);
 private:
     QByteArray m_action;
 };

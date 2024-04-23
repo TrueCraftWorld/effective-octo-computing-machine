@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
     QObject::connect(&inputData, &DataInputParser::dataReady, &netConnect, &NetworkLayer::sendData);
     QObject::connect(&formula, &FormulaInputParser::formulaReady, &netConnect, &NetworkLayer::sendData);
 
+    netConnect.socketSetup();
     netConnect.connectTo(nodeIP, nodePort);
 
     formula.processFormulaFile(formulaFile);

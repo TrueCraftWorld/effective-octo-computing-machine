@@ -20,13 +20,16 @@ public:
     void connectTo(const QHostAddress&, quint16);
     void sendData(const QByteArray&, char);
     void socketSetup();
+    QByteArray& getData();
 
 signals:
-    void dataReady(QByteArray& );
+    void dataReady();
 
 private:
-    QTcpSocket m_tcpSocket;
-    QByteArray recievedData;
+    void dataRecieve();
+    QTcpSocket* m_tcpSocket;
+    QByteArray m_recievedData;
+    quint32 m_awaitedSize;
 };
 
 #endif // NETWORKLAYER_H

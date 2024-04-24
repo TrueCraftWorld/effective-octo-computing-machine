@@ -1,2 +1,5 @@
-# effective-octo-computing-machine
-Test realistion of system of distributed computations
+## effective-octo-computing-machine
+
+# Ветка с текущей документацией
+
+

@@ -1,5 +1,5 @@
-<mxfile host="app.diagrams.net" modified="2024-04-24T18:36:08.477Z" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0" etag="n-PSo2voedIZGUdSV5YE" version="24.3.0" type="github" pages="2">
-  <diagram name="Page-1" id="Eiru2IzGpOkCmMPd_Mnd">
+<mxfile host="app.diagrams.net" modified="2024-04-24T18:36:52.799Z" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0" etag="zvVcnVgXMxIZ6eHf7ToM" version="24.3.0" type="github" pages="3">
+  <diagram name="Idea" id="Eiru2IzGpOkCmMPd_Mnd">
     <mxGraphModel dx="724" dy="515" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
@@ -97,7 +97,7 @@
       </root>
     </mxGraphModel>
   </diagram>
-  <diagram id="pl_bgLDdYuM29bVmIbKJ" name="TaskManager">
+  <diagram id="pl_bgLDdYuM29bVmIbKJ" name="Classes">
     <mxGraphModel dx="1815" dy="1787" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
@@ -305,6 +305,14 @@
         <mxCell id="3X-HPTi5btH3kVTxgH4R-27" value="&lt;div&gt;Программный клей&lt;/div&gt;&lt;div&gt;иничиализация и настройка всего&lt;br&gt;&lt;/div&gt;" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=center;" vertex="1" parent="1">
           <mxGeometry x="-100" y="-170" width="120" height="140" as="geometry" />
         </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="bdtelV6Du3EJqw_EP88p" name="Behavior">
+    <mxGraphModel dx="724" dy="515" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
       </root>
     </mxGraphModel>
   </diagram>

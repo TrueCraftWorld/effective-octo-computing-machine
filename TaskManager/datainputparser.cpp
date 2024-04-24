@@ -17,11 +17,11 @@ void DataInputParser::processFile(QFile & someFile)
     if(!someFile.open(QIODevice::ReadOnly | QIODevice::Text)) return;
     m_data.clear();
     QTextStream inputStream(&someFile);
-    QDataStream stream;
+    QDataStream stream(&m_data, QIODevice::ReadWrite);
     while (!inputStream.atEnd()) { // выглядит как оверкилл, но количество строк считаем и кастим к байт арррею
         QString line = inputStream.readLine();
         stream << line.toDouble();
     }
-    stream >> m_data;
+//    stream.flush();
     emit dataReady(m_data, DATA_IN);
 }

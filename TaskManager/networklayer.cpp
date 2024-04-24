@@ -18,12 +18,11 @@ void NetworkLayer::sendData(const QByteArray & data, char packet)
     QByteArray newArr(data);
 
     if (packet == DATA_IN) m_awaitedSize = newArr.size();
-    while (newArr.size() > MAX_DATA_FRAME-1) {
+    do  {
         newArr.push_front(packet);
         m_tcpSocket->write(newArr.mid(0,MAX_DATA_FRAME));
         newArr = newArr.mid(MAX_DATA_FRAME);
-    }
-
+    } while (newArr.size() > MAX_DATA_FRAME-1);
 }
 
 void NetworkLayer::socketSetup()

@@ -19,11 +19,11 @@ int main(int argc, char *argv[])
             QString("<path> to file with data to compute"),
              QString("path"));
 
-    QCommandLineOption formulaFilePath(QStringList() << "o" << "output",
+    QCommandLineOption outputFilePath(QStringList() << "o" << "output",
             QString("<path> to file to save computed data"),
              QString("path"));
 
-    QCommandLineOption outputFilePath(QStringList() << "f" << "formula",
+    QCommandLineOption formulaFilePath(QStringList() << "f" << "formula",
             QString("<path> to file to read formula from"),
              QString("path"));
 

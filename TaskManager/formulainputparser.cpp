@@ -13,10 +13,11 @@ FormulaInputParser::FormulaInputParser(QObject *parent)
 
 void FormulaInputParser::processFormulaFile(QFile & someFile)
 {
-    if(!someFile.open(QIODevice::ReadOnly | QIODevice::Text)) return;
+    if(!someFile.open(QIODevice::ReadOnly)) return;
     QTextStream inputStream(&someFile);
     m_action.clear();
-    QDataStream stream;
+//    QByteArray arr;
+    QTextStream stream(&m_action);
     stream << START;
     while (!inputStream.atEnd()) { // выглядит как оверкилл, но количество строк считаем и кастим к байт арррею
         QString line = inputStream.readLine();
@@ -41,11 +42,9 @@ void FormulaInputParser::processFormulaFile(QFile & someFile)
         } else {
             stream << (line.toDouble());
         }
-
-        //прочитали
-        //если X оставили как есть
     }
     stream << END;
-    stream >> m_action;
+    stream.flush();
+//    stream >> m_action;
     emit formulaReady(m_action, FORMULA);
 }

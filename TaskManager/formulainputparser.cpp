@@ -39,7 +39,8 @@ void FormulaInputParser::processFormulaFile(QFile & someFile)
         } else if (line.contains(QString("X"))) {
             stream << ARR;
         } else {
-            stream << (line.toDouble());
+            // Перед тем, как добавлять число в строку, нужно добавить команду REG
+            stream << REG << (line.toDouble());
         }
 
         //прочитали

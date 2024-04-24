@@ -17,12 +17,39 @@ void NetworkLayer::sendData(const QByteArray & data, char packet)
 {
     QByteArray newArr(data);
 
-    if (packet == DATA_IN) m_awaitedSize = newArr.size();
-    do  {
-        newArr.push_front(packet);
-        m_tcpSocket->write(newArr.mid(0,MAX_DATA_FRAME));
-        newArr = newArr.mid(MAX_DATA_FRAME);
-    } while (newArr.size() > MAX_DATA_FRAME-1);
+    //заглушка
+       const     char someByte = 0xA1;
+    static QByteArray formArr;
+    if (packet == FORMULA) {
+        formArr.clear();
+        formArr = data;
+        formArr.push_front(packet);
+        return;
+    }
+    //заглушка
+
+    if (packet == DATA_IN) {m_awaitedSize = newArr.size();
+        do  {
+
+            newArr.push_front(packet);
+            //заглушка
+
+            if (m_awaitedSize == newArr.size()) {//мы тут первый и единственный раз
+                newArr.push_front(formArr);
+                quint64 size = m_awaitedSize/sizeof(double);
+                quint32 anotherSize =  m_awaitedSize;
+                //простите мне мой С-style но просили быструю и топорную заглушку
+                char * pSize = (char*)&size;
+                char * pAnotherSize = (char*)&anotherSize;
+                newArr.prepend(pAnotherSize, sizeof(quint64));
+                newArr.prepend(pSize, sizeof(quint32));
+                newArr.push_front(someByte);
+            }
+            //заглушка
+            m_tcpSocket->write(newArr.mid(0,MAX_DATA_FRAME));
+            newArr = newArr.mid(MAX_DATA_FRAME);
+        } while (newArr.size() > MAX_DATA_FRAME-1);
+    }
 }
 
 void NetworkLayer::socketSetup()

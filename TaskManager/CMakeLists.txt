@@ -30,6 +30,7 @@ add_executable(TaskManager
   datainputparser.cpp
   formulainputparser.cpp
   networklayer.cpp
+  dataoutputreader.cpp
 )
 
 target_link_libraries(TaskManager

@@ -56,18 +56,6 @@ int main(int argc, char *argv[])
     QObject::connect(&inputData, &DataInputParser::dataReady, &netConnect, &NetworkLayer::sendData);
     QObject::connect(&formula, &FormulaInputParser::formulaReady, &netConnect, &NetworkLayer::sendData);
 
-//    QObject::connect(netConnect, &NetworkLayer::dataReady, this, [netConnect, &outputFile](){
-//        if (outputFile.open(QFile::WriteOnly)) {
-//        {
-//            QDataStream res = QDataStream(netConnect->getData());
-//            while (res) {
-//                double result = 0;
-//                res >> result;
-//                outputFile.write(QString("%1\n").arg(result));
-//            }
-//        }
-//    });
-
     netConnect.socketSetup();
     netConnect.connectTo(nodeIP, nodePort);
 

@@ -9,11 +9,14 @@ class DataOutputReader : public QObject
     Q_OBJECT
 public:
     explicit DataOutputReader(QObject *parent = nullptr);
-    void saveToFile(QFile &);
+    void setFile(QFile *);
     void setData(QByteArray& );
+
 signals:
 private:
+    void saveToFile();
     QByteArray m_data;
+    QFile * m_file;
 };
 
 #endif // DATAOUTPUTREADER_H

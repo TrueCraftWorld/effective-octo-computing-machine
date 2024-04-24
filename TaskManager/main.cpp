@@ -4,6 +4,7 @@
 #include <QFile>
 
 #include "datainputparser.h"
+#include "dataoutputreader.h"
 #include "formulainputparser.h"
 #include "networklayer.h"
 
@@ -52,10 +53,12 @@ int main(int argc, char *argv[])
     DataInputParser inputData;
     NetworkLayer netConnect;
     FormulaInputParser formula;
+    DataOutputReader fileSaver;
+    fileSaver.setFile(&outputFile);
 
     QObject::connect(&inputData, &DataInputParser::dataReady, &netConnect, &NetworkLayer::sendData);
     QObject::connect(&formula, &FormulaInputParser::formulaReady, &netConnect, &NetworkLayer::sendData);
-
+    QObject::connect(&netConnect, &NetworkLayer::dataReady, &fileSaver, &DataOutputReader::setData);
     netConnect.socketSetup();
     netConnect.connectTo(nodeIP, nodePort);
 

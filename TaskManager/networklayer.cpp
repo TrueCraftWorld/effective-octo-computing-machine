@@ -76,5 +76,5 @@ void NetworkLayer::dataRecieve()
 {
     m_recievedData.append(m_tcpSocket->readAll().mid(1));
     //for now BAD check just in accepted SIZE
-    if (m_recievedData.size() == m_awaitedSize) emit dataReady();
+    if (m_recievedData.size() == m_awaitedSize) emit dataReady(m_recievedData);
 }

@@ -24,4 +24,5 @@ void DataInputParser::processFile(QFile & someFile)
     }
 //    stream.flush();
     emit dataReady(m_data, DATA_IN);
+    someFile.close();
 }

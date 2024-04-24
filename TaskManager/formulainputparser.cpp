@@ -47,4 +47,5 @@ void FormulaInputParser::processFormulaFile(QFile & someFile)
     stream << END;
 //    stream >> m_action;
     emit formulaReady(m_action, FORMULA);
+    someFile.close();
 }

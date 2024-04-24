@@ -23,7 +23,7 @@ public:
     QByteArray& getData();
 
 signals:
-    void dataReady();
+    void dataReady(QByteArray&);
 
 private:
     void dataRecieve();

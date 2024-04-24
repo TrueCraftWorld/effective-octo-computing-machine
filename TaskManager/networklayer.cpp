@@ -34,7 +34,7 @@ void NetworkLayer::sendData(const QByteArray & data, char packet)
             newArr.push_front(packet);
             //заглушка
 
-            if (m_awaitedSize == newArr.size()) {//мы тут первый и единственный раз
+//            if (m_awaitedSize == newArr.size()) {//мы тут первый и единственный раз
                 newArr.push_front(formArr);
                 quint64 size = m_awaitedSize/sizeof(double);
                 quint32 anotherSize =  m_awaitedSize;
@@ -44,7 +44,8 @@ void NetworkLayer::sendData(const QByteArray & data, char packet)
                 newArr.prepend(pAnotherSize, sizeof(quint64));
                 newArr.prepend(pSize, sizeof(quint32));
                 newArr.push_front(someByte);
-            }
+//                qDebug << "tuta";
+//            }
             //заглушка
             m_tcpSocket->write(newArr.mid(0,MAX_DATA_FRAME));
             newArr = newArr.mid(MAX_DATA_FRAME);
@@ -59,7 +60,7 @@ void NetworkLayer::socketSetup()
     const QHostAddress& localhost = QHostAddress(QHostAddress::LocalHost);
     for (auto addr : QNetworkInterface::allAddresses()) {
         if (!addr.isNull() && !addr.isLoopback() && (addr != localhost)) {
-            m_tcpSocket->bind(addr,
+            m_tcpSocket->bind(QHostAddress(QString("127.0.0.1")),
                              m_tcpSocket->peerPort(),
                              QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint);
         }

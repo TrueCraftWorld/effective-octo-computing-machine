@@ -17,4 +17,4 @@
  Например, под Linux, в папке с исполняемым файлом. с допущением, что файлы лежат в этой же папке 
  
  ./TaskManager -i data.txt -o result.txt -f formula.txt -n 192.168.0.42 -p 60000
- [drawio](TaskManagerTopLevelConnection.drawio)
+

@@ -18,4 +18,4 @@
  
  ./TaskManager -i data.txt -o result.txt -f formula.txt -n 192.168.0.42 -p 60000
 
-![drawio](https://github.com/TrueCraftWorld/effective-octo-computing-machine/blob/fe7e846d31f19df33a33784bec9b9953524ea230/images/TaskManagerTopLevelConnection.drawio.png)
+![drawio](images/classes.png)

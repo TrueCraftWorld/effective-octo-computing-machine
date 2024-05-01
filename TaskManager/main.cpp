@@ -44,27 +44,32 @@ int main(int argc, char *argv[])
 
     parser.process(a);
 
-    QHostAddress nodeIP(parser.value(nodeAddressLine));
-    quint16 nodePort(parser.value(nodePortLine).toInt());
-    QFile inputFile(parser.value(inputFilePath));
-    QFile formulaFile(parser.value(formulaFilePath));
-    QFile outputFile(parser.value(outputFilePath));
+    //new content
+    //gathering QStrings from app console params
 
-    DataInputParser inputData;
-    NetworkLayer netConnect;
-    FormulaInputParser formula;
-    DataOutputReader fileSaver;
-    fileSaver.setFile(&outputFile);
 
-    QObject::connect(&inputData, &DataInputParser::dataReady, &netConnect, &NetworkLayer::sendData);
-    QObject::connect(&formula, &FormulaInputParser::formulaReady, &netConnect, &NetworkLayer::sendData);
-    QObject::connect(&netConnect, &NetworkLayer::dataReady, &fileSaver, &DataOutputReader::setData);
-    netConnect.socketSetup();
-    netConnect.connectTo(nodeIP, nodePort);
 
-    formula.processFormulaFile(formulaFile);
+//    QHostAddress nodeIP(parser.value(nodeAddressLine));
+//    quint16 nodePort(parser.value(nodePortLine).toInt());
+//    QFile inputFile(parser.value(inputFilePath));
+//    QFile formulaFile(parser.value(formulaFilePath));
+//    QFile outputFile(parser.value(outputFilePath));
 
-    inputData.processFile(inputFile);
+//    DataInputParser inputData;
+//    NetworkLayer netConnect;
+//    FormulaInputParser formula;
+//    DataOutputReader fileSaver;
+//    fileSaver.setFile(&outputFile);
+
+//    QObject::connect(&inputData, &DataInputParser::dataReady, &netConnect, &NetworkLayer::sendData);
+//    QObject::connect(&formula, &FormulaInputParser::formulaReady, &netConnect, &NetworkLayer::sendData);
+//    QObject::connect(&netConnect, &NetworkLayer::dataReady, &fileSaver, &DataOutputReader::setData);
+//    netConnect.socketSetup();
+//    netConnect.connectTo(nodeIP, nodePort);
+
+//    formula.processFormulaFile(formulaFile);
+
+//    inputData.processFile(inputFile);
 
 
 

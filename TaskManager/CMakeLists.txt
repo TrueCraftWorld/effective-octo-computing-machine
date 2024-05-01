@@ -11,7 +11,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Network)
+find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core Network)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Network)
 
 include_directories(${QT_INCLUDES})
@@ -39,6 +39,18 @@ add_executable(TaskManager
   fileinput.cpp
   tcp_side.cpp
   udp_side.cpp
+  datainputparser.h
+  formulainputparser.h
+  networklayer.h
+  dataoutputreader.h
+  taskmanager.h
+  serializer.h
+  formulacontrol.h
+  datacontrol.h
+  consoleinput.h
+  fileinput.h
+  tcp_side.h
+  udp_side.h
 )
 
 target_link_libraries(TaskManager

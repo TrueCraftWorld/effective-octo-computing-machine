@@ -31,6 +31,14 @@ add_executable(TaskManager
   formulainputparser.cpp
   networklayer.cpp
   dataoutputreader.cpp
+  taskmanager.cpp
+  serializer.cpp
+  formulacontrol.cpp
+  datacontrol.cpp
+  consoleinput.cpp
+  fileinput.cpp
+  tcp_side.cpp
+  udp_side.cpp
 )
 
 target_link_libraries(TaskManager

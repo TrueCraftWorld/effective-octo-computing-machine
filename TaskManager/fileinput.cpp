@@ -5,3 +5,8 @@ FileInput::FileInput(QObject *parent)
 {
 
 }
+
+QTextStream FileInput::setupFile(QString filePath)
+{
+
+}

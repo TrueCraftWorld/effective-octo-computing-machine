@@ -5,10 +5,10 @@
 #include <QTcpSocket>
 #include <QUdpSocket>
 
-constexpr int MAX_DATA_FRAME = 2000;
-constexpr char DATA_IN = 111;
-constexpr char DATA_OUT = 222;
-constexpr char FORMULA = 78; //AKA 333 OVERFLOW
+//constexpr int MAX_DATA_FRAME = 2000;
+//constexpr char DATA_IN = 0xD0;
+//constexpr char DATA_OUT = 0xE0;
+//constexpr char FORMULA = 0xCA; //AKA 333 OVERFLOW
 
 
 class NetworkLayer : public QObject

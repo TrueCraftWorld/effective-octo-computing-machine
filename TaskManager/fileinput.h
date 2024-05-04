@@ -2,15 +2,17 @@
 #define FILEINPUT_H
 
 #include <QObject>
+#include <QFile>
+#include <QTextStream>
 
-class FileInput : public QObject
+class FileInput : public QTextStream
 {
-    Q_OBJECT
 public:
-    explicit FileInput(QObject *parent = nullptr);
-
+    FileInput(QString filePath);
+    ~FileInput();
 signals:
-
+    QFile *m_file;
+//    QByteArray m_arr;
 };
 
 #endif // FILEINPUT_H

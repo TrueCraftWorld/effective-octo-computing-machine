@@ -1,15 +1,16 @@
 #ifndef CONSOLEINPUT_H
 #define CONSOLEINPUT_H
+#include "constants.h"
+#include <QTextStream>
 
-#include <QObject>
-
-class ConsoleInput : public QObject
+class ConsoleInput : public QTextStream
 {
-    Q_OBJECT
 public:
-    explicit ConsoleInput(QObject *parent = nullptr);
+    ConsoleInput(const ConsoleActions&);
 
-signals:
+
+private:
+    QByteArray m_array;
 
 };
 

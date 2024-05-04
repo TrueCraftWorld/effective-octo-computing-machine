@@ -23,6 +23,6 @@ void DataInputParser::processFile(QFile & someFile)
         stream << line.toDouble();
     }
 //    stream.flush();
-    emit dataReady(m_data, DATA_IN);
+//    emit dataReady(m_data, DATA_IN);
     someFile.close();
 }

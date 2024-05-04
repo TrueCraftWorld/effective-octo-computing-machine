@@ -51,6 +51,7 @@ add_executable(TaskManager
   fileinput.h
   tcp_side.h
   udp_side.h
+  constants.h
 )
 
 target_link_libraries(TaskManager

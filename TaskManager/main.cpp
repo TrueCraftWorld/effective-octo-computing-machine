@@ -2,19 +2,39 @@
 #include <QCommandLineParser>
 #include <QHostAddress>
 #include <QFile>
+#include <QStringList>
+#include <QDataStream>
+
 
 #include "datainputparser.h"
 #include "dataoutputreader.h"
 #include "formulainputparser.h"
 #include "networklayer.h"
 
+#include "taskmanager.h"
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    QCoreApplication::setApplicationName("my-copy-program");
+    QCoreApplication::setApplicationName("my-program");
+
+//    QByteArray arr;
+//    QDataStream stream = QDataStream(&arr,  QIODevice::ReadWrite);
+//    QString str = QString("1.2");
+//    QString str2;
+//     QString str1;
+//    stream << str << " " << str << " " << str << " " << str << " ";
+
+////    stream.flush();
+//    stream.device()->reset();
+//    while (stream.atEnd() != true) {
+//        QString string;
+//        stream >> string;
+//    }
+
     QCoreApplication::setApplicationVersion("1.0");
 
-    QCommandLineParser parser;
+    QCommandLineParser startParamParser;
 
     QCommandLineOption inputFilePath(QStringList() << "i" << "input",
             QString("<path> to file with data to compute"),
@@ -36,18 +56,25 @@ int main(int argc, char *argv[])
             QString("<port> of some node from cluster"),
              QString("path"));
 
-    parser.addOption(inputFilePath);
-    parser.addOption(outputFilePath);
-    parser.addOption(formulaFilePath);
-    parser.addOption(nodeAddressLine);
-    parser.addOption(nodePortLine);
+    startParamParser.addOption(inputFilePath);
+    startParamParser.addOption(outputFilePath);
+    startParamParser.addOption(formulaFilePath);
+    startParamParser.addOption(nodeAddressLine);
+    startParamParser.addOption(nodePortLine);
 
-    parser.process(a);
+    startParamParser.process(a);
 
     //new content
     //gathering QStrings from app console params
+    StartParams startParams;
+    startParams.formulaFilePath = startParamParser.value(formulaFilePath);
+    startParams.inputFilePath = startParamParser.value(inputFilePath);
+    startParams.outputFilePath = startParamParser.value(outputFilePath);
+    startParams.targetIP = startParamParser.value(nodeAddressLine);
+    startParams.targetPort = startParamParser.value(nodePortLine);
 
-
+    TaskManager manager;
+    manager.initialize(startParams);
 
 //    QHostAddress nodeIP(parser.value(nodeAddressLine));
 //    quint16 nodePort(parser.value(nodePortLine).toInt());

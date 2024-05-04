@@ -10,6 +10,14 @@
 #include "tcp_side.h"
 #include "udp_side.h"
 
+struct StartParams {
+    QString targetIP;
+    QString targetPort;
+    QString formulaFilePath;
+    QString inputFilePath;
+    QString outputFilePath;
+};
+
 class TaskManager : public QObject
 {
 
@@ -18,18 +26,22 @@ public:
     /**
      * @brief initialize
      */
-    void initialize(QStringList & param);
+    void initialize(StartParams& param);
+    void processData(QDataStream *);
 
-    // as in UML but still not sure is it good
-    FileInput m_fileReader;
     SerialiZer m_serialiser;
-    ConsoleInput m_userConsole;
     FormulaControl m_formula;
     DataControl m_data;
     TCP_Side m_tcp;
     UDP_Side m_udp;
 
 signals:
+    void dataReady(QDataStream *);
+
+private:
+    QTextStream *m_formulaStream;
+    QTextStream *m_inputStream;
+    QTextStream *m_outputStream;
 
 };
 

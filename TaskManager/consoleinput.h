@@ -2,6 +2,7 @@
 #define CONSOLEINPUT_H
 #include "constants.h"
 #include <QTextStream>
+#include <QBuffer>
 
 class ConsoleInput : public QTextStream
 {
@@ -10,7 +11,8 @@ public:
 
 
 private:
-    QByteArray m_array;
+//    QByteArray m_array;
+    QBuffer m_buf;
 
 };
 

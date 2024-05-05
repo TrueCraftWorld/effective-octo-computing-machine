@@ -33,7 +33,7 @@ private:
 
     void addCommomInfo(QSharedPointer<QByteArray>);
 
-    SerialMode m_workMode;
+    SerialMode m_workMode = SerialMode::SEND_CHAR;
 };
 
 #endif // SERIALIZER_H

@@ -5,8 +5,6 @@
 #include "serializer.h"
 #include "fileinput.h"
 #include "consoleinput.h"
-#include "datacontrol.h"
-#include "formulacontrol.h"
 #include "tcp_side.h"
 #include "udp_side.h"
 
@@ -30,8 +28,8 @@ public:
     void processData(QTextStream *);
 
     SerialiZer m_serialiser;
-    FormulaControl m_formula;
-    DataControl m_data;
+//    FormulaControl m_formula;
+//    DataControl m_data;
     TCP_Side m_tcp;
     UDP_Side m_udp;
 

@@ -12,7 +12,6 @@ class FormulaControl : public QObject
     Q_OBJECT
 public:
     explicit FormulaControl(QObject *parent = nullptr);
-    void processFormulaFile(QTextStream &);
 signals:
     void formulaReady(QByteArray& , char);
 private:

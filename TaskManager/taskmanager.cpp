@@ -11,12 +11,18 @@ void TaskManager::initialize(StartParams &param)
 {
 
     if (param.targetIP.isEmpty()) {
-
+        QString str;
+        ConsoleInput consDial(ConsoleActions::TargetIP);
+        consDial >> str;
+        m_tergetNode.ip4Addr = QHostAddress(str);
     } else {
         m_tergetNode.ip4Addr = QHostAddress(param.targetIP);
     }
     if (param.targetPort.isEmpty()) {
-
+        QString str;
+        ConsoleInput consDial_2(ConsoleActions::TargetPort);
+        consDial_2 >> str;
+        m_tergetNode.port = str.toInt();
     } else {
         m_tergetNode.port = (param.targetPort).toInt();
     }
@@ -41,7 +47,7 @@ void TaskManager::initialize(StartParams &param)
         m_inputStream = static_cast<QTextStream*>(new FileInput(param.inputFilePath));
     }
 
-
+    //TODO
     if (param.outputFilePath.isEmpty()) {
 //        m_outputStream = new FileInput(QString("results.txt")); //
     } else {

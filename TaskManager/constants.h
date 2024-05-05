@@ -1,5 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
+#include <QtGlobal>
+
 
 constexpr char START = 0x00;
 constexpr char REG = 0x01;
@@ -17,9 +19,14 @@ constexpr char CTAN = 0x09;
 constexpr char DIV = 0x0A;
 constexpr char END = 0x0B;
 
+constexpr char DATA_INFO = 0xA0;
 constexpr char DATA_IN = 0xD0;
 constexpr char DATA_OUT = 0xE0;
-constexpr char FORMULA = 0xCA; //AKA 333 OVERFLOW
+constexpr char FORMULA = 0xCA;
+
+constexpr quint16 KEY = 132;
+
+constexpr char PADDING = '\n';
 
 enum class ConsoleActions : int {
     Formula,

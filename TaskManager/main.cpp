@@ -18,20 +18,6 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
     QCoreApplication::setApplicationName("my-program");
 
-//    QByteArray arr;
-//    QDataStream stream = QDataStream(&arr,  QIODevice::ReadWrite);
-//    QString str = QString("1.2");
-//    QString str2;
-//     QString str1;
-//    stream << str << " " << str << " " << str << " " << str << " ";
-
-////    stream.flush();
-//    stream.device()->reset();
-//    while (stream.atEnd() != true) {
-//        QString string;
-//        stream >> string;
-//    }
-
     QCoreApplication::setApplicationVersion("1.0");
 
     QCommandLineParser startParamParser;

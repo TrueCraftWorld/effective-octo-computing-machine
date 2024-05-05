@@ -27,7 +27,7 @@ public:
      * @brief initialize
      */
     void initialize(StartParams& param);
-    void processData(QDataStream *);
+    void processData(QTextStream *);
 
     SerialiZer m_serialiser;
     FormulaControl m_formula;
@@ -36,7 +36,7 @@ public:
     UDP_Side m_udp;
 
 signals:
-    void dataReady(QDataStream *);
+    void dataReady(QTextStream *);
 
 private:
     QTextStream *m_formulaStream;

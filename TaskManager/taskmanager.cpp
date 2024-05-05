@@ -9,13 +9,23 @@ TaskManager::TaskManager(QObject *parent)
 
 void TaskManager::initialize(StartParams &param)
 {
+
     if (param.targetIP.isEmpty()) {
 
+    } else {
+        m_tergetNode.ip4Addr = QHostAddress(param.targetIP);
     }
     if (param.targetPort.isEmpty()) {
 
+    } else {
+        m_tergetNode.port = (param.targetPort).toInt();
     }
+    m_tergetNode.soc = new QTcpSocket();
+    m_tergetNode.soc->connectToHost(m_tergetNode.ip4Addr, m_tergetNode.port);
 
+    QObject::connect(&m_serialiser, &SerialiZer::messageReady, this, [this](const QSharedPointer<QByteArray> msg){
+        this->m_tcp_side.SendMessageToNode(m_tergetNode.soc, *msg);
+    });
 
     //idea is that we use text stram in bothcases - console input OR file reading
     //so we just initilizing those streams differently;

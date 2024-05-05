@@ -27,30 +27,21 @@ include_directories(${QT_INCLUDES})
 
 add_executable(TaskManager
   main.cpp
-#  datainputparser.cpp
-#  formulainputparser.cpp
-  networklayer.cpp
+
+  tcpserver.cpp
   dataoutputreader.cpp
   taskmanager.cpp
   serializer.cpp
-#  formulacontrol.cpp
-#  datacontrol.cpp
   consoleinput.cpp
   fileinput.cpp
-  tcp_side.cpp
-  udp_side.cpp
-#  datainputparser.h
-#  formulainputparser.h
-  networklayer.h
+
+  tcpserver.h
   dataoutputreader.h
   taskmanager.h
   serializer.h
-#  formulacontrol.h
-#  datacontrol.h
   consoleinput.h
   fileinput.h
-  tcp_side.h
-  udp_side.h
+
   constants.h
 )
 

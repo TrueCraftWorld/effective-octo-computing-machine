@@ -95,10 +95,10 @@ void Server::slotReadyRead()
 	}
 }
 
-void Server::ReadDataFromTcp()
+void Server::ReadDataFromTcp() 
 {
 	quint64 minForRead = qMin<>(m_waitedBytes, quint64(m_tempSocket->bytesAvailable()));
-	m_dataStorage.append(m_tempSocket->read(minForRead));
+	m_dataStorage.append(m_tempSocket->read(minForRead)); // BUG, TODO: Change m_tempSocket to QDataStream
 	m_waitedBytes -= minForRead;
 }
 

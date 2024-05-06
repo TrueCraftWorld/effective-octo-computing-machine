@@ -49,7 +49,7 @@ void SerialiZer::processDataInput(QTextStream &input)
     emit messageReady(dataStorage);
 
     //testing accepts -- not for real use
-    emit resultsAccepted(dataStorage);
+//    emit resultsAccepted(dataStorage);
 }
 
 void SerialiZer::processReturnData(QSharedPointer<QByteArray> arr)

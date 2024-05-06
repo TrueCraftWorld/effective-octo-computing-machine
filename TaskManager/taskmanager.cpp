@@ -68,6 +68,7 @@ void TaskManager::initialize(StartParams &param)
     } else {
         m_targetNode.port = (param.targetPort).toInt();
     }
+
     m_targetNode.soc = new QTcpSocket();
     m_targetNode.soc->connectToHost(m_targetNode.ip4Addr, m_targetNode.port);
 
@@ -115,10 +116,3 @@ void TaskManager::initialize(StartParams &param)
 
 }
 
-void TaskManager::processData(QTextStream *)
-{
-    //serialize
-//    if (1) m_serialiser.getCharWithDelimeter();
-//    else m_serialiser.getInDataStreamFormat();
-    //send
-}

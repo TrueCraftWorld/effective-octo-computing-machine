@@ -29,14 +29,8 @@ class TaskManager : public QObject
 public:
     explicit TaskManager(QObject *parent = nullptr);
     explicit TaskManager(QCoreApplication *parent = nullptr);
-    /**
-     * @brief initialize
-     */
-    void initialize(StartParams& param);
-    void processData(QTextStream *);
 
-//    TCP_Side m_tcp;
-//    UDP_Side m_udp;
+    void initialize(StartParams& param);
 
 signals:
     void dataReady(QTextStream *);
@@ -45,11 +39,11 @@ private:
     SerialiZer m_serialiser;
     Server m_tcp_side;
     QCommandLineParser m_startParamParser;
+    TargetNode m_targetNode;
 
     QTextStream *m_formulaStream;
     QTextStream *m_inputStream;
     QTextStream *m_outputStream;
-    TargetNode m_targetNode;
 
 };
 

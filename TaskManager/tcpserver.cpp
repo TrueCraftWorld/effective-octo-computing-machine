@@ -33,7 +33,7 @@ void Server::SendMessageToNode(QTcpSocket* socket, QSharedPointer<QByteArray> ms
 {
     if (socket == nullptr) return;
     QByteArray temp_msg;
-//	temp_msg.clear();
+    temp_msg.clear();
 
     QTextStream msgStream(&temp_msg, QIODevice::ReadWrite);
     msgStream.setPadChar('\n');

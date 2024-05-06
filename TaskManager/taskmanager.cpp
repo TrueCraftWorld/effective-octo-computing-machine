@@ -112,7 +112,5 @@ void TaskManager::initialize(StartParams &param)
 
     m_serialiser.processFormula(*m_formulaStream);
     m_serialiser.processDataInput(*m_inputStream);
-
-
 }
 

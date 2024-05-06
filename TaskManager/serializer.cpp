@@ -107,7 +107,7 @@ void SerialiZer::processFormula(QTextStream & input)
     QByteArray packInfo;
     QTextStream stream2(packInfo, QIODevice::ReadWrite);
     stream2 << FORMULA << PADDING;
-//    stream2.flush();
+    stream2.flush();
     dataStorage->prepend(packInfo);
     emit messageReady(dataStorage);
 }

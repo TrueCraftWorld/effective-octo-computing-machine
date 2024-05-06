@@ -5,6 +5,47 @@ TaskManager::TaskManager(QObject *parent)
     : QObject{parent}
 {
 
+
+}
+
+TaskManager::TaskManager(QCoreApplication *parent)
+    : QObject{parent}
+{
+    QCommandLineOption inputFilePath(QStringList() << "i" << "input",
+            QString("<path> to file with data to compute"),
+             QString("path"));
+
+    QCommandLineOption outputFilePath(QStringList() << "o" << "output",
+            QString("<path> to file to save computed data"),
+             QString("path"));
+
+    QCommandLineOption formulaFilePath(QStringList() << "f" << "formula",
+            QString("<path> to file to read formula from"),
+             QString("path"));
+
+    QCommandLineOption nodeAddressLine(QStringList() << "n" << "node_IP",
+            QString("<IP-address> of some node from cluster"),
+             QString("IP-address"));
+
+    QCommandLineOption nodePortLine(QStringList() << "p" << "node_port",
+            QString("<port> of some node from cluster"),
+             QString("path"));
+
+    m_startParamParser.addOption(inputFilePath);
+    m_startParamParser.addOption(outputFilePath);
+    m_startParamParser.addOption(formulaFilePath);
+    m_startParamParser.addOption(nodeAddressLine);
+    m_startParamParser.addOption(nodePortLine);
+
+    m_startParamParser.process(*parent);
+
+    StartParams startParams;
+    startParams.formulaFilePath = m_startParamParser.value(formulaFilePath);
+    startParams.inputFilePath = m_startParamParser.value(inputFilePath);
+    startParams.outputFilePath = m_startParamParser.value(outputFilePath);
+    startParams.targetIP = m_startParamParser.value(nodeAddressLine);
+    startParams.targetPort = m_startParamParser.value(nodePortLine);
+    initialize(startParams);
 }
 
 void TaskManager::initialize(StartParams &param)
@@ -14,23 +55,23 @@ void TaskManager::initialize(StartParams &param)
         QString str;
         ConsoleInput consDial(ConsoleActions::TargetIP);
         consDial >> str;
-        m_tergetNode.ip4Addr = QHostAddress(str);
+        m_targetNode.ip4Addr = QHostAddress(str);
     } else {
-        m_tergetNode.ip4Addr = QHostAddress(param.targetIP);
+        m_targetNode.ip4Addr = QHostAddress(param.targetIP);
     }
     if (param.targetPort.isEmpty()) {
         QString str;
         ConsoleInput consDial_2(ConsoleActions::TargetPort);
         consDial_2 >> str;
-        m_tergetNode.port = str.toInt();
+        m_targetNode.port = str.toInt();
     } else {
-        m_tergetNode.port = (param.targetPort).toInt();
+        m_targetNode.port = (param.targetPort).toInt();
     }
-    m_tergetNode.soc = new QTcpSocket();
-    m_tergetNode.soc->connectToHost(m_tergetNode.ip4Addr, m_tergetNode.port);
+    m_targetNode.soc = new QTcpSocket();
+    m_targetNode.soc->connectToHost(m_targetNode.ip4Addr, m_targetNode.port);
 
     QObject::connect(&m_serialiser, &SerialiZer::messageReady, this, [this](const QSharedPointer<QByteArray> msg){
-        this->m_tcp_side.SendMessageToNode(m_tergetNode.soc, *msg);
+        this->m_tcp_side.SendMessageToNode(m_targetNode.soc, *msg);
     });
 
     //idea is that we use text stram in bothcases - console input OR file reading

@@ -7,6 +7,7 @@
 #include "fileinput.h"
 #include "consoleinput.h"
 #include "tcpserver.h"
+#include <QCommandLineParser>
 
 struct StartParams {
     QString targetIP;
@@ -27,6 +28,7 @@ class TaskManager : public QObject
 
 public:
     explicit TaskManager(QObject *parent = nullptr);
+    explicit TaskManager(QCoreApplication *parent = nullptr);
     /**
      * @brief initialize
      */
@@ -44,11 +46,12 @@ signals:
 private:
     SerialiZer m_serialiser;
     Server m_tcp_side;
+    QCommandLineParser m_startParamParser;
 
     QTextStream *m_formulaStream;
     QTextStream *m_inputStream;
     QTextStream *m_outputStream;
-    TargetNode m_tergetNode;
+    TargetNode m_targetNode;
 
 };
 

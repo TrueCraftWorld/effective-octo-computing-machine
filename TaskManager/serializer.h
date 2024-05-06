@@ -25,9 +25,11 @@ public:
     void processFormula(QTextStream&);
     void processDataInput(QTextStream&);
 
+    void processReturnData(QSharedPointer<QByteArray>);
 
 signals:
     void messageReady(QSharedPointer<QByteArray>);
+    void resultsAccepted(QSharedPointer<QByteArray>);
 
 private:
 

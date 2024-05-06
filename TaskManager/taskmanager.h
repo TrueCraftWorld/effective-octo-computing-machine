@@ -35,8 +35,6 @@ public:
     void initialize(StartParams& param);
     void processData(QTextStream *);
 
-
-
 //    TCP_Side m_tcp;
 //    UDP_Side m_udp;
 

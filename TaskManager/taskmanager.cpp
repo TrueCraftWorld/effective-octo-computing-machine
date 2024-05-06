@@ -1,5 +1,6 @@
 #include "taskmanager.h"
 #include "constants.h"
+#include <iostream>
 
 TaskManager::TaskManager(QObject *parent)
     : QObject{parent}
@@ -70,8 +71,20 @@ void TaskManager::initialize(StartParams &param)
     m_targetNode.soc = new QTcpSocket();
     m_targetNode.soc->connectToHost(m_targetNode.ip4Addr, m_targetNode.port);
 
-    QObject::connect(&m_serialiser, &SerialiZer::messageReady, this, [this](const QSharedPointer<QByteArray> msg){
-        this->m_tcp_side.SendMessageToNode(m_targetNode.soc, *msg);
+    QObject::connect(&m_serialiser, &SerialiZer::messageReady, this,
+                     [this](QSharedPointer<QByteArray> msg) {
+        m_tcp_side.SendMessageToNode(m_targetNode.soc, msg);
+    });
+    QObject::connect(&m_tcp_side, &Server::signalSendDataToSerializer, &m_serialiser,  &SerialiZer::processReturnData);
+
+    QObject::connect(&m_serialiser, &SerialiZer::resultsAccepted, this,
+                     [this](QSharedPointer<QByteArray> msg) {
+        m_inputStream = new QTextStream(msg.get());
+        QString tmp;
+        while (!m_inputStream->atEnd()) {
+            *m_inputStream >> tmp;
+            std::cout << tmp.toStdString() << std::endl;
+        }
     });
 
     //idea is that we use text stram in bothcases - console input OR file reading
@@ -89,6 +102,7 @@ void TaskManager::initialize(StartParams &param)
     }
 
     //TODO
+
     if (param.outputFilePath.isEmpty()) {
 //        m_outputStream = new FileInput(QString("results.txt")); //
     } else {

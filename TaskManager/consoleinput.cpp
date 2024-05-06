@@ -7,8 +7,9 @@
 ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
 {
 //    QTextStream input(&m_array);
-    this->setDevice(&m_buf);
-    this->device()->open(QIODevice::ReadWrite);
+    setDevice(&m_buf);
+    device()->open(QIODevice::ReadWrite);
+    setPadChar(PADDING);
     switch (actionType) {
     case ConsoleActions::DataIn:
 
@@ -20,11 +21,11 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
             if (line == "quit") {
                 std::cout << "quit!" << std::endl;
                 flush();
-                device()->reset();
+//                device()->reset();
                 break;
             } else if (QString::fromStdString(line).toDouble() != 0.0) {
                 std::cout << "data accepted" << std::endl;
-                *(static_cast<QTextStream*>(this)) << QString::fromStdString(line).toDouble() << PADDING;
+                *(static_cast<QTextStream*>(this)) << QString::fromStdString(line).toDouble();
             } else {
                 std::cout << "smth wrong" << std::endl;
                 break;
@@ -46,7 +47,7 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
                 break;
             } else if (!QString::fromStdString(line).contains(' ')) {
                 std::cout << "data accepted" << std::endl;
-                *(static_cast<QTextStream*>(this)) << QString::fromStdString(line) << PADDING;
+                *(static_cast<QTextStream*>(this)) << QString::fromStdString(line);
             } else {
                 std::cout << "smth wrong" << std::endl;
                 break;
@@ -65,7 +66,7 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
                 break;
             } else if (!QString::fromStdString(line).contains(' ')){
                 std::cout << "data accepted" << std::endl;
-                *(static_cast<QTextStream*>(this)) << QString::fromStdString(line) << PADDING;
+                *(static_cast<QTextStream*>(this)) << QString::fromStdString(line);
                 break;
             }
         }
@@ -82,7 +83,7 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
                 break;
             } else if (!QString::fromStdString(line).contains(' ')) {
                 std::cout << "data accepted" << std::endl;
-                *(static_cast<QTextStream*>(this)) << QString::fromStdString(line) << PADDING;
+                *(static_cast<QTextStream*>(this)) << QString::fromStdString(line);
                 break;
             }
         }

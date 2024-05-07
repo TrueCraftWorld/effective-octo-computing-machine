@@ -1,174 +1,99 @@
 
 /**
  *   \file     node.cpp
- *   \version  0.01
- *   \date     2024.04.23
+ *   \version  0.02
+ *   \date     2024.05.07
  */
 
+#include <QRandomGenerator>
 #include "node.h"
 
 
 /**
- *   \brief   Конструктор по умолчанию
+ *   \brief   Конструктор
+ *   \param  *parent - указатель на родительский класс
+ *   \retval  Нет
+ */
+Node::Node(QObject *parent, const Options_command_line &options_command_line)
+    : QObject{parent}
+{
+    m_node_info.mode_node = ModeNode::SN_WAIT;
+    m_node_info.priority = QRandomGenerator::global()->generate();
+    if (options_command_line.local_mode)
+    {
+        m_node_info.port = options_command_line.local_mode_receive_port;
+    }
+    else
+    {
+        m_node_info.port = options_command_line.multicast_port;
+    }
+    qDebug() << "Приоритет узла:" << m_node_info.priority;
+    m_discovery_service = new DiscoveryService(parent, options_command_line);
+    m_discovery_service->setObjectName("dis");
+
+    connect(m_discovery_service, &DiscoveryService::data_ready, this, &Node::node_data);
+}
+
+
+/**
+ *   \brief   Деструктор
  *   \param   Нет
- *   \return  Нет
+ *   \retval  Нет
  */
-Node::Node()
+Node::~Node()
 {
-    ip = QHostAddress();
-    port = 0;
-    priority = 0;
-    mips = 0.0;
-    throughput = 0.0;
+    m_discovery_service->deleteLater();
 }
 
 
 /**
- *   \brief   Конструктор с параметрами
- *   \param   ip - IP адрес узла в сети
- *   \param   port - порт узла в сети
- *   \param   priority - приоритет узла в сети
- *   \param   mips - вычислительная мощность узла в сети
- *   \param   throughput - пропускная способность до узла
- *   \return  Нет
- */
-Node::Node(QString ip, quint16 port, quint32 priority, double mips, double throughput) : ip(QHostAddress(ip)),
-    port(port),
-    priority(priority),
-    mips(mips),
-    throughput(throughput),
-    connected(false)
-{
-}
-
-
-/**
- *   \brief   Сохраняем IP адрес
- *   \param   ip - IP адрес
- *   \return  Нет
- */
-void Node::set_ip(QString ip)
-{
-    this->ip = QHostAddress(ip);
-}
-
-
-/**
- *   \brief   Сохраняем номер порта
- *   \param   port - номер порта
- *   \return  Нет
- */
-void Node::set_port(quint16 port)
-{
-    this->port = port;
-}
-
-
-/**
- *   \brief   Сохраняем приоритет
- *   \param   priority - приоритет
- *   \return  Нет
- */
-void Node::set_priority(quint32 priority)
-{
-    this->priority = priority;
-}
-
-
-/**
- *   \brief   Сохраняем вычислительную мощность
- *   \param   mips - вычислительная мощность
- *   \return  Нет
- */
-void Node::set_mips(double mips)
-{
-    this->mips = mips;
-}
-
-
-/**
- *   \brief   Сохраняем пропускную способность
- *   \param   throughput - пропускная способность
- *   \return  Нет
- */
-void Node::set_throughput(double throughput)
-{
-    this->throughput = throughput;
-}
-
-
-/**
- *   \brief   Сохраняем признак установления связи с узлом
- *   \param   connected - признак связи с узлом, true - инициатор связи, false - приемник связи
- *   \return  Нет
- */
-void Node::set_connected(bool connected)
-{
-    this->connected = connected;
-}
-
-
-/**
- *   \brief   Возвращаем IP адрес
+ *   \brief   Функция возвращает приоритет узла
  *   \param   Нет
- *   \return  IP адрес
+ *   \retval  Приоритет узла
  */
-QString Node::get_ip()
+quint32 Node::get_priority() const
 {
-    return ip.toString();
+    return m_node_info.priority;
 }
 
 
 /**
- *   \brief   Возвращаем номер порта
- *   \param   Нет
- *   \return  Номер порта
+ *   \brief   Обновление данных узлов
+ *   \param   node_data - данные соседнего узла
+ *   \retval  Нет
  */
-quint16 Node::get_port()
+void Node::node_data(NodeData &node_data)
 {
-    return port;
-}
+    bool present = false;
 
 
-/**
- *   \brief   Возвращаем приоритет
- *   \param   Нет
- *   \return  Приоритет
- */
-quint32 Node::get_priority()
-{
-    return priority;
-}
+    if (get_priority() != node_data.priority)
+    {
+        if (!m_node_info.neighbour_nodes.empty())
+        {
+            std::list<NodeData>::iterator it;
 
 
-/**
- *   \brief   Возвращаем вычислительную мощьность
- *   \param   Нет
- *   \return  Вычислительная мощьность
- */
-double Node::get_mips()
-{
-    return mips;
-}
+            for (it = m_node_info.neighbour_nodes.begin(); it != m_node_info.neighbour_nodes.end(); ++it)
+            {
+                if ((it->ip == node_data.ip) && (it->port == node_data.port) && (it->priority == node_data.priority))
+                {
+                    present = true;
+                }
+            }
 
+            if (!present)
+            {
+                m_node_info.neighbour_nodes.push_back(node_data);
 
-/**
- *   \brief   Возвращаем пропускную способность
- *   \param   Нет
- *   \return  Пропускная способность
- */
-double Node::get_throughput()
-{
-    return throughput;
-}
+                emit node_info_updated();
+            }
+        }
+        else
+        {
+            m_node_info.neighbour_nodes.push_back(node_data);
 
-
-/**
- *   \brief   Возвращаем признак установления связи с узлом
- *   \param   Нет
- *   \return  true - инициатор связи, false - приемник связи
- */
-bool Node::get_connected()
-{
-    return connected;
+            emit node_info_updated();
+        }
+    }
 }

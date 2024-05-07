@@ -1,43 +1,37 @@
 
 /**
  *   \file     node.h
- *   \version  0.01
- *   \date     2024.04.23
+ *   \version  0.02
+ *   \date     2024.05.07
  */
-
 
 #ifndef NODE_H
 #define NODE_H
 
-#include <QString>
-#include <QtNetwork/QHostAddress>
+#include <QObject>
+
+#include "node_info.h"
+#include "discovery_service.h"
 
 
-class Node
+class Node : public QObject
 {
-    public:
-        explicit Node();
-        explicit Node(QString ip, quint16 port, quint32 priority,  double mips,  double throughput = 0.0);
-        void set_ip(QString ip);
-        void set_port(quint16 port);
-        void set_priority(quint32 priority);
-        void set_mips(double mips);
-        void set_throughput(double throughput);
-        void set_connected(bool connected);
-        QString get_ip();
-        quint16 get_port();
-        quint32 get_priority();
-        double get_mips();
-        double get_throughput();
-        bool get_connected();
+    Q_OBJECT
+public:
+    explicit Node(QObject *parent,
+                  const Options_command_line &options_command_line);
+    ~Node();
+    quint32 get_priority() const;
 
-    private :
-        QHostAddress ip;
-        quint16 port;
-        quint32 priority;
-        double mips;
-        double throughput;
-        bool connected;
+signals:
+    void node_info_updated();  /// список с данными узлов обновился
+
+public slots:
+    void node_data(NodeData &node_data);  /// данные соседнего узла
+
+private:
+    NodeInfo m_node_info;
+    DiscoveryService *m_discovery_service = nullptr;
 };
 
 #endif // NODE_H

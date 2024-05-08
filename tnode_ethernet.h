@@ -27,8 +27,8 @@ signals:
     void ethernet_data_ready(QByteArray &data);
 
 public slots:
-    void receive_datagram_multicast_mode(void);  /// прием (receive) данных из сети и передача в последовательный порт, мультикастовый режим работы
-    void transmit_datagram_multicast_mode(QByteArray &data);  /// прием данных из последовательного порта и передача (sender) в сеть, мультикастовый режим работы
+    void receive_datagram_multicast_mode(void);  /// прием (receive) данных из сети мультикастовый режим работы
+    void transmit_datagram_multicast_mode(QByteArray &data);  /// передача (sender) в сеть, мультикастовый режим работы
 
 private:
     QHostAddress host_ip_address;  /// IP адрес хоста

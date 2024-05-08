@@ -76,11 +76,11 @@ TNode_Ethernet::~TNode_Ethernet()
  *   \param   Нет
  *   \retval  Нет
  */
-void  TNode_Ethernet::find_host_ip( void )
+void TNode_Ethernet::find_host_ip(void)
 {
-    foreach ( const  QHostAddress  &address, QNetworkInterface::allAddresses() )
+    foreach (const QHostAddress &address, QNetworkInterface::allAddresses())
     {
-        if ( address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress( QHostAddress::LocalHost ) )
+        if (address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress(QHostAddress::LocalHost))
         {
             host_ip_address = address;
             qDebug() << host_ip_address.toString();
@@ -94,7 +94,7 @@ void  TNode_Ethernet::find_host_ip( void )
  *   \param  *data - данные для отправки
  *   \retval  Нет
  */
-void  TNode_Ethernet::transmit_datagram_multicast_mode(QByteArray &data)
+void TNode_Ethernet::transmit_datagram_multicast_mode(QByteArray &data)
 {
     QRegularExpression exp("node");
     QList<Node *> node = parent()->findChildren<Node *>(exp);
@@ -102,7 +102,7 @@ void  TNode_Ethernet::transmit_datagram_multicast_mode(QByteArray &data)
 
     if (node.at(0)->get_mode_node() == ModeNode::MN_WAIT)
     {
-        udp_socket_transmit->writeDatagram( data, multicast_address, multicast_port );
+        udp_socket_transmit->writeDatagram(data, multicast_address, multicast_port);
     }
 }
 
@@ -112,9 +112,9 @@ void  TNode_Ethernet::transmit_datagram_multicast_mode(QByteArray &data)
  *   \param   Нет
  *   \retval  Нет
  */
-void TNode_Ethernet::receive_datagram_multicast_mode( void )
+void TNode_Ethernet::receive_datagram_multicast_mode(void)
 {
-    if ( udp_socket_receive->hasPendingDatagrams() )
+    if (udp_socket_receive->hasPendingDatagrams())
     {
         QNetworkDatagram n_datagram = udp_socket_receive->receiveDatagram();
 

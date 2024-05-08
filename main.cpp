@@ -1,8 +1,8 @@
 
 /**
  *   \file     main.cpp
- *   \version  0.02
- *   \date     2024.05.07
+ *   \version  0.03
+ *   \date     2024.05.08
  *   \mainpage
  */
 
@@ -29,10 +29,8 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationVersion("0.3");
     Options_command_line options_command_line = { static_cast<quint16>(Udp_socket_setting::MULTICAST_PORT),
                                                   default_ip,
-                                                  static_cast<quint16>(Udp_socket_setting::LOCAL_MODE_TRANSMIT_PORT),
-                                                  static_cast<quint16>(Udp_socket_setting::LOCAL_MODE_RECEIVE_PORT),
-                                                  //QHostAddress(QHostAddress::LocalHost).toString(),
-                                                  QHostAddress(QHostAddress::AnyIPv4).toString(),
+                                                  static_cast<quint16>(Udp_socket_setting::LOCAL_MODE_PORT),
+                                                  QHostAddress(QHostAddress::Any).toString(),
                                                   false,
                                                   false };
 

@@ -1,8 +1,8 @@
 
 /**
  *   \file     tnode_ethernet.h
- *   \version  0.03
- *   \date     2024.05.07
+ *   \version  0.04
+ *   \date     2024.05.08
  */
 
 #ifndef TNODE_ETHERNET_H
@@ -31,19 +31,15 @@ public slots:
     void receive_datagram_local_mode(void);  /// прием (receive) данных из сети, локальный режим работы
 
 private:
+    const quint16 local_mode_port = 49002;
+    QUdpSocket *udp_socket_local = nullptr;
     QString multicast_ip;  /// мультикастовый ip адрес
     quint16 multicast_port;  /// порт мультикастового адреса
     QString local_mode_ip;  /// IP-адрес в локальном режиме
     bool local_mode;  /// режим работы узла, работа узла в локальном режиме
     bool verbose;  /// подробный вывод
-    const quint16 local_mode_receive_port = 49001;
-    const quint16 local_mode_transmit_port = 49001;
-    QUdpSocket *udp_socket_local = nullptr;
-    //QUdpSocket *udp_socket_transmit = nullptr;
-    //QUdpSocket *udp_socket_receive = nullptr;
-    void init_local_mode();
 
-    //void receive_datagram_local_mode(void);  /// прием (receive) данных из сети, локальный режим работы
+    void init_local_mode();
 };
 
 #endif // TNODE_ETHERNET_H

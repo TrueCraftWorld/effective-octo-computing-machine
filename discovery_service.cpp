@@ -1,8 +1,8 @@
 
 /**
  *   \file     discovery_service.cpp
- *   \version  0.03
- *   \date     2024.05.07
+ *   \version  0.04
+ *   \date     2024.05.08
  */
 
 #include <QRegularExpression>
@@ -78,6 +78,7 @@ void DiscoveryService::timeout_timer_1hz(QObject *parent)
         QDataStream stream(&ba, QIODevice::WriteOnly);
 
 
+        stream.setVersion(QDataStream::Qt_5_15);
         stream << priority;
 
         emit transmit_data_node(ba);
@@ -96,6 +97,7 @@ void DiscoveryService::receive_data_node(QByteArray &data)
     QDataStream stream(&data, QIODevice::ReadOnly);
 
 
+    stream.setVersion(QDataStream::Qt_5_15);
     stream >> node_data.ip;
     stream >> node_data.port;
     stream >> node_data.priority;

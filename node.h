@@ -1,8 +1,8 @@
 
 /**
  *   \file     node.h
- *   \version  0.02
- *   \date     2024.05.07
+ *   \version  0.03
+ *   \date     2024.05.08
  */
 
 #ifndef NODE_H
@@ -22,6 +22,7 @@ public:
                   const Options_command_line &options_command_line);
     ~Node();
     quint32 get_priority() const;
+    ModeNode get_mode_node();
 
 signals:
     void node_info_updated();  /// список с данными узлов обновился

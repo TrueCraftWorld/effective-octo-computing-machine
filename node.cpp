@@ -1,8 +1,8 @@
 
 /**
  *   \file     node.cpp
- *   \version  0.02
- *   \date     2024.05.07
+ *   \version  0.03
+ *   \date     2024.05.08
  */
 
 #include <QRandomGenerator>
@@ -17,11 +17,11 @@
 Node::Node(QObject *parent, const Options_command_line &options_command_line)
     : QObject{parent}
 {
-    m_node_info.mode_node = ModeNode::SN_WAIT;
+    m_node_info.mode_node = ModeNode::MN_WAIT;
     m_node_info.priority = QRandomGenerator::global()->generate();
     if (options_command_line.local_mode)
     {
-        m_node_info.port = options_command_line.local_mode_receive_port;
+        m_node_info.port = options_command_line.local_mode_port;
     }
     else
     {
@@ -85,6 +85,8 @@ void Node::node_data(NodeData &node_data)
             if (!present)
             {
                 m_node_info.neighbour_nodes.push_back(node_data);
+                qDebug() << node_data.ip;
+                qDebug() << node_data.priority;
 
                 emit node_info_updated();
             }
@@ -92,8 +94,21 @@ void Node::node_data(NodeData &node_data)
         else
         {
             m_node_info.neighbour_nodes.push_back(node_data);
+            qDebug() << node_data.ip;
+            qDebug() << node_data.priority;
 
             emit node_info_updated();
         }
     }
+}
+
+
+/**
+ *   \brief   Функция возвращает режим узла
+ *   \param   Нет
+ *   \retval  Режим узла
+ */
+ModeNode Node::get_mode_node()
+{
+    return m_node_info.mode_node;
 }

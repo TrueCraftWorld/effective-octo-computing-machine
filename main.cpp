@@ -34,6 +34,10 @@ int main(int argc, char *argv[])
                                                   false,
                                                   false };
 
+    #ifdef Q_OS_WIN32
+        QTextCodec::setCodecForLocale(QTextCodec::codecForName("IBM 866"));
+    #endif
+
     qDebug() << "Узел";
     qDebug() << QCoreApplication::applicationVersion();
     parser_cmd_line(QCoreApplication::arguments(), options_command_line);

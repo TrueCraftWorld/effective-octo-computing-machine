@@ -104,11 +104,11 @@ void TaskManager::initialize(StartParams &param)
 
     //TODO
 
-    if (param.outputFilePath.isEmpty()) {
+//    if (param.outputFilePath.isEmpty()) {
 //        m_outputStream = new FileInput(QString("results.txt")); //
-    } else {
-        m_outputStream = static_cast<QTextStream*>(new FileInput(param.outputFilePath));
-    }
+//    } else {
+//        m_outputStream = static_cast<QTextStream*>(new FileInput(param.outputFilePath));
+//    }
 
     m_serialiser.processFormula(*m_formulaStream);
     m_serialiser.processDataInput(*m_inputStream);

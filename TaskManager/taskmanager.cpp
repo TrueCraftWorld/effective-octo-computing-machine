@@ -69,13 +69,21 @@ void TaskManager::initialize(StartParams &param)
         m_targetNode.port = (param.targetPort).toInt();
     }
 
-    m_targetNode.soc = new QTcpSocket();
-    m_targetNode.soc->connectToHost(m_targetNode.ip4Addr, m_targetNode.port);
+//    m_targetNode.soc = new QTcpSocket();
+//    m_targetNode.soc->connectToHost(m_targetNode.ip4Addr, m_targetNode.port);
+//    m_tcp_side.InitializeSocket(m_targetNode.soc);
+
 
     QObject::connect(&m_serialiser, &SerialiZer::messageReady, this,
                      [this](QSharedPointer<QByteArray> msg) {
         m_tcp_side.SendMessageToNode(m_targetNode.soc, msg);
     });
+
+    QObject::connect(&m_tcp_side, &Server::signalSocketConnected, this, [this](QTcpSocket* socketForConnect, QHostAddress ip4, quint16 port)
+    {
+        this->m_targetNode.soc = socketForConnect;
+    });
+
     QObject::connect(&m_tcp_side, &Server::signalSendDataToSerializer, &m_serialiser,  &SerialiZer::processReturnData);
 
     QObject::connect(&m_serialiser, &SerialiZer::resultsAccepted, this,
@@ -87,6 +95,8 @@ void TaskManager::initialize(StartParams &param)
             std::cout << tmp.toStdString() << std::endl;
         }
     });
+
+    m_tcp_side.slotConnectSocket(m_targetNode.ip4Addr, m_targetNode.port);
 
     //idea is that we use text stram in bothcases - console input OR file reading
     //so we just initilizing those streams differently;
@@ -110,7 +120,8 @@ void TaskManager::initialize(StartParams &param)
 //        m_outputStream = static_cast<QTextStream*>(new FileInput(param.outputFilePath));
 //    }
 
-    m_serialiser.processFormula(*m_formulaStream);
+
     m_serialiser.processDataInput(*m_inputStream);
+    m_serialiser.processFormula(*m_formulaStream);
 }
 

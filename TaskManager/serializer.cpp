@@ -1,8 +1,8 @@
 #include "serializer.h"
 #include "constants.h"
-#include <QDataStream>
+#include <QTextStream>
 #include <QSharedPointer>
-
+#include <QDebug>
 
 
 SerialiZer::SerialiZer(QObject *parent)
@@ -38,6 +38,7 @@ void SerialiZer::processDataInput(QTextStream &input)
     dataInfoStream << DATA_INFO << PADDING << dataCount << PADDING;
     dataInfoStream.flush();
     emit messageReady(dataInfo);
+    qDebug() << "sentInfo";
 
     //awakward way to add info to bytearray
     QByteArray packInfo;
@@ -47,6 +48,7 @@ void SerialiZer::processDataInput(QTextStream &input)
     packStream.flush();
     dataStorage->prepend(packInfo);
     emit messageReady(dataStorage);
+    qDebug() << "sentData";
 
     //testing accepts -- not for real use
 //    emit resultsAccepted(dataStorage);
@@ -110,4 +112,5 @@ void SerialiZer::processFormula(QTextStream & input)
     stream2.flush();
     dataStorage->prepend(packInfo);
     emit messageReady(dataStorage);
+    qDebug() << "sentFormula";
 }

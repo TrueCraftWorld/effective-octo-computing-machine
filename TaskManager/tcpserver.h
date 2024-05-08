@@ -14,14 +14,14 @@ public:
 	Server(quint16 port = 0);
 //	void SendMessageToNode(QTcpSocket* socket, const QByteArray& msg);
     void SendMessageToNode(QTcpSocket* socket, QSharedPointer<QByteArray>);
-
+    void InitializeSocket(QTcpSocket* socket);
 private:
 	QTcpSocket* m_tempSocket;
     QByteArray* m_dataStorage;
 	quint64 m_waitedBytes;
 	bool m_isAwaitingAdditionalData;
 private:
-	void InitializeSocket(QTcpSocket* socket);
+//	void InitializeSocket(QTcpSocket* socket);
 	void ReadDataFromTcp();
 
 signals:

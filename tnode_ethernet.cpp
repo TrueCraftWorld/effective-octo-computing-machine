@@ -7,10 +7,11 @@
 
 #include <QDataStream>
 #include <QAbstractSocket>
+#include <QNetworkInterface>
+#include <QRegularExpression>
 
 #include "tnode_ethernet.h"
 #include "node.h"
-#include "qregularexpression.h"
 
 
 /**
@@ -21,14 +22,39 @@
 TNode_Ethernet::TNode_Ethernet(QObject *parent, const Options_command_line &options_command_line)
     : QObject{parent}, multicast_ip(options_command_line.multicast_ip),
     multicast_port(options_command_line.multicast_port),
-    local_mode_ip(options_command_line.local_mode_ip),
-    local_mode(options_command_line.local_mode),
     verbose(options_command_line.verbose)
 {
-    if (options_command_line.local_mode)
+    find_host_ip();  /// Поиск ip адреса хоста
+
+    multicast_address = QHostAddress(multicast_ip);
+
+    // Приём датаграмм
+    udp_socket_receive = new QUdpSocket(this);
+    udp_socket_receive->setObjectName("udp_socket_receive");
+
+    if (udp_socket_receive->bind(QHostAddress::AnyIPv4, multicast_port, QUdpSocket::ShareAddress))
     {
-        init_local_mode();
-        qDebug() << "Инициализация локального режима";
+        if (udp_socket_receive->joinMulticastGroup(multicast_address))
+        {
+            connect(udp_socket_receive, &QUdpSocket::readyRead, this, &TNode_Ethernet::receive_datagram_multicast_mode);
+        }
+        else
+        {
+            qDebug() << "udp_socket_receive joinMulticastGroup error";
+        }
+    }
+    else
+    {
+        qDebug() << "udp_socket_sender bind error";
+    }
+
+    // Передача датаграмм
+    udp_socket_transmit = new QUdpSocket(this);
+    udp_socket_transmit->setObjectName("udp_socket_sender");
+
+    if (udp_socket_transmit->bind(QHostAddress(QHostAddress::AnyIPv4), multicast_port, QUdpSocket::ShareAddress))
+    {
+        udp_socket_transmit->setSocketOption(QAbstractSocket::MulticastTtlOption, qint32(Udp_socket_setting::TTL));
     }
 }
 
@@ -40,23 +66,60 @@ TNode_Ethernet::TNode_Ethernet(QObject *parent, const Options_command_line &opti
  */
 TNode_Ethernet::~TNode_Ethernet()
 {
-    udp_socket_local->deleteLater();
+    udp_socket_receive->deleteLater();
+    udp_socket_transmit->deleteLater();
 }
 
 
 /**
- *   \brief   Прием (receive) данных из сети, локальный режим работы
+ *   \brief   Поиск ip адреса хоста
  *   \param   Нет
  *   \retval  Нет
  */
-void TNode_Ethernet::receive_datagram_local_mode(void)
+void  TNode_Ethernet::find_host_ip( void )
 {
-    if (udp_socket_local->hasPendingDatagrams())
+    foreach ( const  QHostAddress  &address, QNetworkInterface::allAddresses() )
     {
-        QNetworkDatagram n_datagram = udp_socket_local->receiveDatagram();
+        if ( address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress( QHostAddress::LocalHost ) )
+        {
+            host_ip_address = address;
+            qDebug() << host_ip_address.toString();
+        }
+    }
+}
 
 
-        if (n_datagram.destinationPort() == local_mode_port)
+/**
+ *   \brief   Передача данных в сеть
+ *   \param  *data - данные для отправки
+ *   \retval  Нет
+ */
+void  TNode_Ethernet::transmit_datagram_multicast_mode(QByteArray &data)
+{
+    QRegularExpression exp("node");
+    QList<Node *> node = parent()->findChildren<Node *>(exp);
+
+
+    if (node.at(0)->get_mode_node() == ModeNode::MN_WAIT)
+    {
+        udp_socket_transmit->writeDatagram( data, multicast_address, multicast_port );
+    }
+}
+
+
+/**
+ *   \brief   Прием данных из сети
+ *   \param   Нет
+ *   \retval  Нет
+ */
+void TNode_Ethernet::receive_datagram_multicast_mode( void )
+{
+    if ( udp_socket_receive->hasPendingDatagrams() )
+    {
+        QNetworkDatagram n_datagram = udp_socket_receive->receiveDatagram();
+
+
+        if (n_datagram.senderPort() == multicast_port)
         {
             QByteArray ba;
 
@@ -74,35 +137,4 @@ void TNode_Ethernet::receive_datagram_local_mode(void)
             emit  ethernet_data_ready(ba);
         }
     }
-}
-
-
-/**
- *   \brief   Передача (sender) данных в сеть, локальный режим работы
- *   \param  *data - данные для отправки
- *   \retval  Нет
- */
-void TNode_Ethernet::transmit_datagram_local_mode(QByteArray &data)
-{
-    QRegularExpression exp("node");
-    QList<Node *> node = parent()->findChildren<Node *>(exp);
-
-
-    if (node.at(0)->get_mode_node() == ModeNode::MN_WAIT)
-    {
-        udp_socket_local->writeDatagram(data, QHostAddress::Broadcast, local_mode_port);
-    }
-}
-
-
-/**
- *   \brief   Инициализация локального режима работы
- *   \param   Нет
- *   \retval  Нет
- */
-void TNode_Ethernet::init_local_mode()
-{
-    udp_socket_local = new QUdpSocket(this);
-    udp_socket_local->bind(QHostAddress(local_mode_ip), local_mode_port, QUdpSocket::ShareAddress | QUdpSocket::ReuseAddressHint);
-    connect(udp_socket_local, &QUdpSocket::readyRead, this, &TNode_Ethernet::receive_datagram_local_mode);
 }

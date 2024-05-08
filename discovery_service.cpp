@@ -23,7 +23,7 @@ DiscoveryService::DiscoveryService(QObject *parent, const Options_command_line &
     eth = new TNode_Ethernet(parent, options_command_line);
     eth->setObjectName("eth");
     connect(eth, &TNode_Ethernet::ethernet_data_ready, this, &DiscoveryService::receive_data_node);
-    connect(this, &DiscoveryService::transmit_data_node, eth, &TNode_Ethernet::transmit_datagram_local_mode);
+    connect(this, &DiscoveryService::transmit_data_node, eth, &TNode_Ethernet::transmit_datagram_multicast_mode);
 
     timer_1hz = new  QTimer(parent);
     timer_1hz->setObjectName("timer_1hz");

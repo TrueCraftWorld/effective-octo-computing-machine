@@ -19,14 +19,7 @@ Node::Node(QObject *parent, const Options_command_line &options_command_line)
 {
     m_node_info.mode_node = ModeNode::MN_WAIT;
     m_node_info.priority = QRandomGenerator::global()->generate();
-    if (options_command_line.local_mode)
-    {
-        m_node_info.port = options_command_line.local_mode_port;
-    }
-    else
-    {
-        m_node_info.port = options_command_line.multicast_port;
-    }
+    m_node_info.port = options_command_line.multicast_port;
     qDebug() << "Приоритет узла:" << m_node_info.priority;
     m_discovery_service = new DiscoveryService(parent, options_command_line);
     m_discovery_service->setObjectName("dis");

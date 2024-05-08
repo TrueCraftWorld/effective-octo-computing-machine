@@ -27,19 +27,19 @@ signals:
     void ethernet_data_ready(QByteArray &data);
 
 public slots:
-    void transmit_datagram_local_mode(QByteArray &data);  /// прием данных из сети (transmit), локальный режим работы
-    void receive_datagram_local_mode(void);  /// прием (receive) данных из сети, локальный режим работы
+    void receive_datagram_multicast_mode(void);  /// прием (receive) данных из сети и передача в последовательный порт, мультикастовый режим работы
+    void transmit_datagram_multicast_mode(QByteArray &data);  /// прием данных из последовательного порта и передача (sender) в сеть, мультикастовый режим работы
 
 private:
-    const quint16 local_mode_port = 49002;
-    QUdpSocket *udp_socket_local = nullptr;
+    QHostAddress host_ip_address;  /// IP адрес хоста
+    QHostAddress multicast_address;  /// мультикастовый адрес
     QString multicast_ip;  /// мультикастовый ip адрес
     quint16 multicast_port;  /// порт мультикастового адреса
-    QString local_mode_ip;  /// IP-адрес в локальном режиме
-    bool local_mode;  /// режим работы узла, работа узла в локальном режиме
+    QUdpSocket *udp_socket_receive = nullptr;
+    QUdpSocket *udp_socket_transmit = nullptr;
     bool verbose;  /// подробный вывод
 
-    void init_local_mode();
+    void find_host_ip();
 };
 
 #endif // TNODE_ETHERNET_H

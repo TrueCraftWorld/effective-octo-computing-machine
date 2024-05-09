@@ -8,6 +8,7 @@
 #include "consoleinput.h"
 #include "tcpserver.h"
 #include <QCommandLineParser>
+#include <QSharedPointer>
 
 struct StartParams {
     QString targetIP;
@@ -32,8 +33,9 @@ public:
 
     void initialize(StartParams& param);
 
+
 signals:
-    void dataReady(QTextStream *);
+    void dataRecieved();
 
 private:
     SerialiZer m_serialiser;
@@ -43,7 +45,7 @@ private:
 
     QTextStream *m_formulaStream;
     QTextStream *m_inputStream;
-    QTextStream *m_outputStream;
+    AbstractOutput *m_outputStream;
 
 };
 

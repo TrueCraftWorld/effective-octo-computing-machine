@@ -52,6 +52,23 @@ TaskManager::TaskManager(QCoreApplication *parent)
 void TaskManager::initialize(StartParams &param)
 {
 
+    QObject::connect(&m_serialiser, &SerialiZer::messageReady, this,
+                     [this](QSharedPointer<QByteArray> msg) {
+        m_tcp_side.SendMessageToNode(m_targetNode.soc, msg);
+    });
+    QObject::connect(&m_tcp_side, &Server::signalSocketConnected, this,
+                     [this](QTcpSocket* socketForConnect, QHostAddress ip4, quint16 port)
+    {
+        this->m_targetNode.soc = socketForConnect;
+    });
+
+    QObject::connect(&m_tcp_side, &Server::signalSendDataToSerializer, &m_serialiser,  &SerialiZer::processReturnData);
+
+    QObject::connect(&m_serialiser, &SerialiZer::resultsAccepted, this,
+                     [this](QSharedPointer<QByteArray> msg) {
+        m_outputStream->dataOutput(msg);
+    });
+
     if (param.targetIP.isEmpty()) {
         QString str;
         ConsoleInput consDial(ConsoleActions::TargetIP);
@@ -60,6 +77,7 @@ void TaskManager::initialize(StartParams &param)
     } else {
         m_targetNode.ip4Addr = QHostAddress(param.targetIP);
     }
+
     if (param.targetPort.isEmpty()) {
         QString str;
         ConsoleInput consDial_2(ConsoleActions::TargetPort);
@@ -69,32 +87,6 @@ void TaskManager::initialize(StartParams &param)
         m_targetNode.port = (param.targetPort).toInt();
     }
 
-//    m_targetNode.soc = new QTcpSocket();
-//    m_targetNode.soc->connectToHost(m_targetNode.ip4Addr, m_targetNode.port);
-//    m_tcp_side.InitializeSocket(m_targetNode.soc);
-
-
-    QObject::connect(&m_serialiser, &SerialiZer::messageReady, this,
-                     [this](QSharedPointer<QByteArray> msg) {
-        m_tcp_side.SendMessageToNode(m_targetNode.soc, msg);
-    });
-
-    QObject::connect(&m_tcp_side, &Server::signalSocketConnected, this, [this](QTcpSocket* socketForConnect, QHostAddress ip4, quint16 port)
-    {
-        this->m_targetNode.soc = socketForConnect;
-    });
-
-    QObject::connect(&m_tcp_side, &Server::signalSendDataToSerializer, &m_serialiser,  &SerialiZer::processReturnData);
-
-    QObject::connect(&m_serialiser, &SerialiZer::resultsAccepted, this,
-                     [this](QSharedPointer<QByteArray> msg) {
-        m_inputStream = new QTextStream(msg.get());
-        QString tmp;
-        while (!m_inputStream->atEnd()) {
-            *m_inputStream >> tmp;
-            std::cout << tmp.toStdString() << std::endl;
-        }
-    });
 
     m_tcp_side.slotConnectSocket(m_targetNode.ip4Addr, m_targetNode.port);
 
@@ -112,13 +104,15 @@ void TaskManager::initialize(StartParams &param)
         m_inputStream = static_cast<QTextStream*>(new FileInput(param.inputFilePath));
     }
 
-    //TODO
 
-//    if (param.outputFilePath.isEmpty()) {
-//        m_outputStream = new FileInput(QString("results.txt")); //
-//    } else {
-//        m_outputStream = static_cast<QTextStream*>(new FileInput(param.outputFilePath));
-//    }
+    if (param.outputFilePath.isEmpty()) {
+        ConsoleInput * tmp= new ConsoleInput(ConsoleActions::DataOut); //
+        m_outputStream = static_cast<AbstractOutput*>(tmp);
+
+    } else {
+        FileInput * tmp= new FileInput(QString("results.txt")); //
+        m_outputStream = static_cast<AbstractOutput*>(tmp);
+    }
 
 
     m_serialiser.processDataInput(*m_inputStream);

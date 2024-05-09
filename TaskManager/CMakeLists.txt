@@ -29,18 +29,20 @@ add_executable(TaskManager
   main.cpp
 
   tcpserver.cpp
-  dataoutputreader.cpp
+#  dataoutputreader.cpp
   taskmanager.cpp
   serializer.cpp
   consoleinput.cpp
   fileinput.cpp
+#  abstractoutput.cpp
 
   tcpserver.h
-  dataoutputreader.h
+#  dataoutputreader.h
   taskmanager.h
   serializer.h
   consoleinput.h
   fileinput.h
+  abstractoutput.h
 
   constants.h
 )

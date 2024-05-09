@@ -18,7 +18,6 @@ void SerialiZer::processDataInput(QTextStream &input)
     input.device()->reset(); //sets position to 0 in all IO diveces but Qstring
     quint64 dataCount = 0;
     QTextStream stream(dataStorage.get(), QIODevice::ReadWrite);
-//    stream.setPadChar(PADDING);
     QString line;
     while (!input.atEnd()) {
         line.clear();
@@ -34,7 +33,6 @@ void SerialiZer::processDataInput(QTextStream &input)
 
     //sending datainfo ahead
     QTextStream dataInfoStream(dataInfo.get(), QIODevice::ReadWrite);
-//    dataInfoStream.setPadChar(PADDING);
     dataInfoStream << DATA_INFO << PADDING << dataCount << PADDING;
     dataInfoStream.flush();
     emit messageReady(dataInfo);
@@ -43,25 +41,22 @@ void SerialiZer::processDataInput(QTextStream &input)
     //awakward way to add info to bytearray
     QByteArray packInfo;
     QTextStream packStream(packInfo, QIODevice::ReadWrite);
-//    packStream.setPadChar(PADDING);
+
     packStream << DATA_IN << PADDING;
     packStream.flush();
     dataStorage->prepend(packInfo);
     emit messageReady(dataStorage);
     qDebug() << "sentData";
-
-    //testing accepts -- not for real use
-//    emit resultsAccepted(dataStorage);
 }
 
 void SerialiZer::processReturnData(QSharedPointer<QByteArray> arr)
 {
    QTextStream input(arr.get());
-//   input.setPadChar(PADDING);
-
    char packageId;
    input >> packageId;
-   if (packageId != DATA_OUT) return;
+
+   //NEED to decomment line below in prod
+//   if (packageId != DATA_OUT) return;
 
    emit resultsAccepted(arr);
 
@@ -73,7 +68,6 @@ void SerialiZer::processFormula(QTextStream & input)
     input.device()->reset();
     if (m_workMode == SerialMode::SEND_CHAR) {
         QTextStream stream(dataStorage.get(),QIODevice::ReadWrite);
-//        stream.setPadChar(PADDING);
         stream << START;
         while (!input.atEnd()) { // выглядит как оверкилл, но количество строк считаем и кастим к байт арррею
             QString line;

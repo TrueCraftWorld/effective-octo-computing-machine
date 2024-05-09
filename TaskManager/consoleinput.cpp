@@ -3,6 +3,8 @@
 #include <iostream>
 #include <QTextStream>
 #include <QBuffer>
+#include <QSharedPointer>
+
 
 ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
 {
@@ -22,7 +24,7 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
                 break;
             } else if (QString::fromStdString(line).toDouble() != 0.0) {
                 std::cout << "data accepted" << std::endl;
-                *(static_cast<QTextStream*>(this)) << QString::fromStdString(line).toDouble() << PADDING;
+                *this << QString::fromStdString(line).toDouble() << PADDING;
             } else {
                 std::cout << "smth wrong" << std::endl;
                 break;
@@ -31,6 +33,7 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
         break;
     case ConsoleActions::DataOut:
         //TODO
+        //justfine
         break;
     case ConsoleActions::Formula:
         std::cout << "Enter formula in reverse Polish. every input on new line. Enter \"quit\" to stop entering" << "\r\n";
@@ -44,7 +47,7 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
                 break;
             } else if (!QString::fromStdString(line).contains(' ')) {
                 std::cout << "data accepted" << std::endl;
-                *(static_cast<QTextStream*>(this)) << QString::fromStdString(line) << PADDING;
+                *this << QString::fromStdString(line) << PADDING;
             } else {
                 std::cout << "smth wrong" << std::endl;
                 break;
@@ -63,7 +66,7 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
                 break;
             } else if (!QString::fromStdString(line).contains(' ')){
                 std::cout << "data accepted" << std::endl;
-                *(static_cast<QTextStream*>(this)) << QString::fromStdString(line) << PADDING;
+                *this << QString::fromStdString(line) << PADDING;
                 break;
             }
         }
@@ -80,11 +83,24 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
                 break;
             } else if (!QString::fromStdString(line).contains(' ')) {
                 std::cout << "data accepted" << std::endl;
-                *(static_cast<QTextStream*>(this)) << QString::fromStdString(line) << PADDING;
+                *this << QString::fromStdString(line) << PADDING;
                 break;
             }
         }
 
         break;
+    }
+}
+
+void ConsoleInput::dataOutput(QSharedPointer<QByteArray> inp)
+{
+    QString tmp;
+    *this << *inp;
+    flush();
+    device()->reset();
+
+    while (!atEnd()){
+        *this >> tmp;
+        std::cout << tmp.toStdString() << std::endl;
     }
 }

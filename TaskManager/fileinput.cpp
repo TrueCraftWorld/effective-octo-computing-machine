@@ -18,3 +18,22 @@ FileInput::~FileInput()
 {
     m_file->close();
 }
+
+void FileInput::dataOutput(QSharedPointer<QByteArray> inp)
+{
+
+    while(!atEnd()) {
+        char tmp;
+        *this >> tmp;
+    }
+    m_file->close();
+
+    if (m_file->open(QIODevice::ReadWrite)) {
+        m_file->seek(0);
+        setDevice(m_file);
+        *this << (*inp);
+        flush();
+    }
+
+
+}

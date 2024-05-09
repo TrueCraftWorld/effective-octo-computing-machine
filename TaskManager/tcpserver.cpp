@@ -43,6 +43,7 @@ void Server::SendMessageToNode(QTcpSocket* socket, QSharedPointer<QByteArray> ms
 //	if (socket != nullptr)
 //	{
 		socket->write(temp_msg);
+//        socket->
 //	}
 }
 
@@ -52,9 +53,11 @@ void Server::slotReadyRead()
     m_tempSocket = (QTcpSocket*)sender();
     QTextStream streamIn(m_tempSocket);
 //	unsigned char op;
-    QSharedPointer<QByteArray> tmp (new QByteArray());
-            *tmp = (QByteArray(streamIn.device()->readAll()));
-    qDebug() << (*tmp);
+    QSharedPointer<QByteArray> tmp (new QByteArray(streamIn.device()->readAll()));
+//    *tmp = (QByteArray(streamIn.device()->readAll()));
+    signalSendDataToSerializer(tmp);
+//
+//    qDebug() << (*tmp);
 //	m_tempSocket = (QTcpSocket*)sender();
 //	QDataStream streamIn(m_tempSocket);
 //	unsigned char op;

@@ -93,25 +93,23 @@ void TaskManager::initialize(StartParams &param)
     //idea is that we use text stram in bothcases - console input OR file reading
     //so we just initilizing those streams differently;
     if (param.formulaFilePath.isEmpty()) { 
-         m_formulaStream = static_cast<QTextStream*>(new ConsoleInput(ConsoleActions::Formula));
+         m_formulaStream = (new ConsoleInput(ConsoleActions::Formula));
     } else {
-        m_formulaStream = static_cast<QTextStream*>(new FileInput(param.formulaFilePath));
+        m_formulaStream = (new FileInput(param.formulaFilePath));
     }
 
     if (param.inputFilePath.isEmpty()) {
-        m_inputStream = static_cast<QTextStream*>(new ConsoleInput(ConsoleActions::DataIn));
+        m_inputStream = (new ConsoleInput(ConsoleActions::DataIn));
     } else {
-        m_inputStream = static_cast<QTextStream*>(new FileInput(param.inputFilePath));
+        m_inputStream = (new FileInput(param.inputFilePath));
     }
 
 
     if (param.outputFilePath.isEmpty()) {
-        ConsoleInput * tmp= new ConsoleInput(ConsoleActions::DataOut); //
-        m_outputStream = static_cast<AbstractOutput*>(tmp);
+        m_outputStream = new ConsoleInput(ConsoleActions::DataOut); //
 
     } else {
-        FileInput * tmp= new FileInput(QString("results.txt")); //
-        m_outputStream = static_cast<AbstractOutput*>(tmp);
+        m_outputStream = new FileInput(QString("results.txt")); //
     }
 
 

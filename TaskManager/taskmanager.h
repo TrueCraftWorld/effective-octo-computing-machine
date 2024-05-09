@@ -43,8 +43,8 @@ private:
     QCommandLineParser m_startParamParser;
     TargetNode m_targetNode;
 
-    QTextStream *m_formulaStream;
-    QTextStream *m_inputStream;
+    AbstractOutput *m_formulaStream;
+    AbstractOutput *m_inputStream;
     AbstractOutput *m_outputStream;
 
 };

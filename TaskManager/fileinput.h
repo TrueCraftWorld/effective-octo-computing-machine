@@ -5,7 +5,7 @@
 #include <QFile>
 #include <QTextStream>
 
-class FileInput : public AbstractOutput, public QTextStream
+class FileInput : public AbstractOutput
 {
 public:
     FileInput(QString filePath);

@@ -22,12 +22,16 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
                 std::cout << "quit!" << std::endl;
                 flush();
                 break;
-            } else if (QString::fromStdString(line).toDouble() != 0.0) {
-                std::cout << "data accepted" << std::endl;
-                *this << QString::fromStdString(line).toDouble() << PADDING;
             } else {
-                std::cout << "smth wrong" << std::endl;
-                break;
+                bool isOk = false;
+                double tmp = QString::fromStdString(line).toDouble(&isOk);
+                if (isOk) {
+                    std::cout << "data accepted" << std::endl;
+                    *this << QString::fromStdString(line).toDouble() << PADDING;
+                } else {
+                    std::cout << "smth wrong, data dropped" << std::endl;
+    //                break;
+                }
             }
         }
         break;
@@ -49,8 +53,8 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
                 std::cout << "data accepted" << std::endl;
                 *this << QString::fromStdString(line) << PADDING;
             } else {
-                std::cout << "smth wrong" << std::endl;
-                break;
+                std::cout << "smth wrong, data dropped" << std::endl;
+//                break;
             }
         }
         break;

@@ -27,7 +27,7 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
                 double tmp = QString::fromStdString(line).toDouble(&isOk);
                 if (isOk) {
                     std::cout << "data accepted" << std::endl;
-                    *this << QString::fromStdString(line).toDouble() << PADDING;
+                    *this << tmp << PADDING;
                 } else {
                     std::cout << "smth wrong, data dropped" << std::endl;
     //                break;

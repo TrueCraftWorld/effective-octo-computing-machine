@@ -3,8 +3,8 @@
 #include <QSharedPointer>
 #include <QByteArray>
 //#include "tst_datainptest.h"
-#include "../serializer.h"
-#include "../constants.h"
+#include "../../serializer.h"
+#include "../../constants.h"
 // add necessary includes here
 
 class dataInpTest : public QObject

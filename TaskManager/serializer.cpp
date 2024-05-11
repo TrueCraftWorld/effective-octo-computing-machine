@@ -13,37 +13,42 @@ SerialiZer::SerialiZer(QObject *parent)
 
 void SerialiZer::processDataInput(QTextStream &input)
 {
+//    QT_NO_CAST_FROM_BYTEARRAY;
     QSharedPointer<QByteArray> dataStorage (new QByteArray());
 
     input.device()->reset(); //sets position to 0 in all IO diveces but Qstring
     quint64 dataCount = 0;
     QTextStream stream(dataStorage.get(), QIODevice::ReadWrite);
     QString line;
+    input >> line;
+    dataCount = line.toInt();
+
+    QSharedPointer<QByteArray> dataInfo (new QByteArray());  //dataInfo litrally can be formed only in here
+    dataInfo->clear();
+    //sending datainfo ahead
+    QTextStream dataInfoStream(dataInfo.get(), QIODevice::ReadWrite);
+//    QByteArray dataInfoStupidAddOn = QByteArrayLiteral("\xA0");
+    dataInfoStream << PADDING << dataCount << PADDING;
+    dataInfoStream.flush();
+    dataInfo->prepend(DATA_INFO);
+    emit messageReady(dataInfo);
+    qDebug() << "sentInfo";
+
     while (!input.atEnd()) {
         line.clear();
         input >> line;
         stream << line << PADDING;
-        dataCount++;
+//        dataCount++;
     }
-    stream.seek(0);
+//    stream.seek(0);
     stream.flush();
     input.device()->close();
 
-    QSharedPointer<QByteArray> dataInfo (new QByteArray());  //dataInfo litrally can be formed only in here
 
-    //sending datainfo ahead
-    QTextStream dataInfoStream(dataInfo.get(), QIODevice::ReadWrite);
-    dataInfoStream << DATA_INFO << PADDING << dataCount << PADDING;
-    dataInfoStream.flush();
-    emit messageReady(dataInfo);
-    qDebug() << "sentInfo";
 
     //awakward way to add info to bytearray
-    QByteArray packInfo;
-    QTextStream packStream(packInfo, QIODevice::ReadWrite);
-
-    packStream << DATA_IN << PADDING;
-    packStream.flush();
+    QByteArray packInfo = QByteArrayLiteral("\xD0");
+    packInfo.append(PADDING);
     dataStorage->prepend(packInfo);
     emit messageReady(dataStorage);
     qDebug() << "sentData";
@@ -59,7 +64,6 @@ void SerialiZer::processReturnData(QSharedPointer<QByteArray> arr)
 //   if (packageId != DATA_OUT) return;
 
    emit resultsAccepted(arr);
-
 }
 
 void SerialiZer::processFormula(QTextStream & input)

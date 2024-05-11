@@ -24,7 +24,6 @@ public:
     explicit SerialiZer(QObject *parent = nullptr);
     void processFormula(QTextStream&);
     void processDataInput(QTextStream&);
-
     void processReturnData(QSharedPointer<QByteArray>);
 
 signals:

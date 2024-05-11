@@ -42,7 +42,7 @@ void Server::SendMessageToNode(QTcpSocket* socket, QSharedPointer<QByteArray> ms
 
     temp_msg.push_back("132");
     temp_msg.push_back(PADDING);
-    temp_msg.push_back(msg->size());
+    temp_msg.push_back(QString("%1").arg(msg->size()).toLatin1());
     temp_msg.push_back(PADDING);
     temp_msg.push_back(*msg);
 

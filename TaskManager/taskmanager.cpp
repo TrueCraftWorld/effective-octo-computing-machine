@@ -100,6 +100,7 @@ void TaskManager::initialize(StartParams &param)
 
     if (param.inputFilePath.isEmpty()) {
         m_inputStream = (new ConsoleInput(ConsoleActions::DataIn));
+//        m_inputStreamsetCodec("Windows-1251");
     } else {
         m_inputStream = (new FileInput(param.inputFilePath));
     }
@@ -107,7 +108,6 @@ void TaskManager::initialize(StartParams &param)
 
     if (param.outputFilePath.isEmpty()) {
         m_outputStream = new ConsoleInput(ConsoleActions::DataOut); //
-
     } else {
         m_outputStream = new FileInput(QString("results.txt")); //
     }

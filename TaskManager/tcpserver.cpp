@@ -1,6 +1,7 @@
 #include "tcpserver.h"
 #include <QStack>
 #include <QFile>
+
 //#include <fstream>
 #include <cmath>
 
@@ -35,14 +36,19 @@ void Server::SendMessageToNode(QTcpSocket* socket, QSharedPointer<QByteArray> ms
     QByteArray temp_msg;
     temp_msg.clear();
 
-    QTextStream msgStream(&temp_msg, QIODevice::ReadWrite);
-    msgStream.setPadChar('\n');
 
-    msgStream << quint16(KEY_PROGRAM) << PADDING << quint64(msg->size()) << PADDING << *msg;
-    msgStream.flush();
+//    temp_msg.push_back(PADDING);
+
+
+    temp_msg.push_back("132");
+    temp_msg.push_back(PADDING);
+    temp_msg.push_back(msg->size());
+    temp_msg.push_back(PADDING);
+    temp_msg.push_back(*msg);
+
 //	if (socket != nullptr)
 //	{
-		socket->write(temp_msg);
+    socket->write(temp_msg);
 //        socket->
 //	}
 }
@@ -51,11 +57,55 @@ void Server::slotReadyRead()
 {
     qDebug() << "recieve";
     m_tempSocket = (QTcpSocket*)sender();
+    quint32 bytesArrived = m_tempSocket->bytesAvailable();
+    quint16 keyProgram = 0;
     QTextStream streamIn(m_tempSocket);
+    if (m_isAwaitingAdditionalData) {
+        //WHAT TO DO if there is start of new message in the end of
+        //branch of continious accepting
+    } else if (bytesArrived < 10) {
+        return;
+    } else {
+
+        streamIn >> keyProgram;
+        if (keyProgram != KEY_PROGRAM)
+            return;
+//        }
+//        else {
+            streamIn >> m_waitedBytes;
+            qint64 diff =  (bytesArrived - (3 + QString("%1").arg(m_waitedBytes).size()));
+            while (diff > 0) {
+                QSharedPointer<QByteArray> tmp (new QByteArray());
+                tmp->append(streamIn.read(m_waitedBytes).toLatin1());
+                emit signalSendDataToSerializer(tmp);
+                streamIn >> keyProgram;
+                if (keyProgram != KEY_PROGRAM)
+                    return;
+                  streamIn >> m_waitedBytes;
+            }
+            if (diff < 0) { //accept less then needed
+//                m_isAwaitingAdditionalData = true;
+//                m_dataStorage = (new QByteArray());
+//                streamIn >> *m_dataStorage;
+//                m_waitedBytes -= abs(diff);
+//                return; //
+
+                //DEMO: should be working but there is a problem above so commented out
+            } else if (diff == 0) {
+                //            emit signalSendDataToSerializer(QSharedPointer<QByteArray>(m_dataStorage));
+                //            m_dataStorage = nullptr;
+                QSharedPointer<QByteArray> tmp (new QByteArray());
+                streamIn >> *tmp;
+                emit signalSendDataToSerializer(tmp);
+            }
+    }
+
+
+//    QTextStream streamIn(m_tempSocket);
 //	unsigned char op;
-    QSharedPointer<QByteArray> tmp (new QByteArray(streamIn.device()->readAll()));
+//    QSharedPointer<QByteArray> tmp (new QByteArray(streamIn.device()->readAll()));
 //    *tmp = (QByteArray(streamIn.device()->readAll()));
-    signalSendDataToSerializer(tmp);
+//    signalSendDataToSerializer(tmp);
 //
 //    qDebug() << (*tmp);
 //	m_tempSocket = (QTcpSocket*)sender();

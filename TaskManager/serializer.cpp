@@ -13,31 +13,37 @@ SerialiZer::SerialiZer(QObject *parent)
 
 void SerialiZer::processDataInput(QTextStream &input)
 {
-//    QT_NO_CAST_FROM_BYTEARRAY;
     QSharedPointer<QByteArray> dataStorage (new QByteArray());
 
     input.device()->reset(); //sets position to 0 in all IO diveces but Qstring
     quint64 dataCount = 0;
     QTextStream stream(dataStorage.get(), QIODevice::ReadWrite);
+    stream.setAutoDetectUnicode(false);
+//    stream.setCodec("windows-1251");
     QString line;
     input >> line;
     dataCount = line.toInt();
 
     QSharedPointer<QByteArray> dataInfo (new QByteArray());  //dataInfo litrally can be formed only in here
     dataInfo->clear();
+
     //sending datainfo ahead
     QTextStream dataInfoStream(dataInfo.get(), QIODevice::ReadWrite);
 //    QByteArray dataInfoStupidAddOn = QByteArrayLiteral("\xA0");
+    dataInfoStream.setAutoDetectUnicode(false);
+    dataInfoStream.setCodec("windows-1251");
     dataInfoStream << PADDING << dataCount << PADDING;
     dataInfoStream.flush();
     dataInfo->prepend(DATA_INFO);
     emit messageReady(dataInfo);
-    qDebug() << "sentInfo";
+    qDebug() << "dataInfo";
+//    qDebug() << (*dataInfo);
 
     while (!input.atEnd()) {
+        stream << PADDING;
         line.clear();
         input >> line;
-        stream << line << PADDING;
+        stream << line;
 //        dataCount++;
     }
 //    stream.seek(0);
@@ -47,9 +53,10 @@ void SerialiZer::processDataInput(QTextStream &input)
 
 
     //awakward way to add info to bytearray
-    QByteArray packInfo = QByteArrayLiteral("\xD0");
-    packInfo.append(PADDING);
-    dataStorage->prepend(packInfo);
+//    QByteArray packInfo;
+//    packInfo.append(DATA_IN);
+//    packInfo.append(PADDING);
+    dataStorage->prepend(DATA_IN);
     emit messageReady(dataStorage);
     qDebug() << "sentData";
 }
@@ -57,6 +64,8 @@ void SerialiZer::processDataInput(QTextStream &input)
 void SerialiZer::processReturnData(QSharedPointer<QByteArray> arr)
 {
    QTextStream input(arr.get());
+   input.setAutoDetectUnicode(false);
+//   input.setCodec("windows-1251");
    char packageId;
    input >> packageId;
 
@@ -69,11 +78,16 @@ void SerialiZer::processReturnData(QSharedPointer<QByteArray> arr)
 void SerialiZer::processFormula(QTextStream & input)
 {
     QSharedPointer<QByteArray> dataStorage (new QByteArray());
+    input.setAutoDetectUnicode(false);
+//    input.setCodec("windows-1251");
     input.device()->reset();
     if (m_workMode == SerialMode::SEND_CHAR) {
         QTextStream stream(dataStorage.get(),QIODevice::ReadWrite);
+        stream.setAutoDetectUnicode(false);
+        stream.setCodec("windows-1251");
         stream << START;
         while (!input.atEnd()) { // выглядит как оверкилл, но количество строк считаем и кастим к байт арррею
+            stream  << PADDING;
             QString line;
             input >> line;
             if (line.contains(QString("+"))) {
@@ -94,20 +108,22 @@ void SerialiZer::processFormula(QTextStream & input)
                 stream << CTAN;
             } else if (line.contains(QString("X"))) {
                 stream << ARR;
-            } else {
+            } else if (!line.isEmpty()){
                 stream << REG << PADDING;
                 stream << (line);
             }
-            stream  << PADDING;
+
         }
         stream << END;
         stream.flush();
         input.device()->close();
     }
     QByteArray packInfo;
-    QTextStream stream2(packInfo, QIODevice::ReadWrite);
-    stream2 << FORMULA << PADDING;
-    stream2.flush();
+//    QTextStream stream2(packInfo, QIODevice::ReadWrite);
+//    stream2 << FORMULA << PADDING;
+//    stream2.flush();
+    packInfo.append(FORMULA);
+    packInfo.append(PADDING);
     dataStorage->prepend(packInfo);
     emit messageReady(dataStorage);
     qDebug() << "sentFormula";

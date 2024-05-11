@@ -8,14 +8,19 @@
 
 ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
 {
+//    setCodec("windows-1251");
+    setAutoDetectUnicode(false);
     setDevice(&m_buf);
     device()->open(QIODevice::ReadWrite);
+    int dataCount = 0;
+//    QByteArray * dataArr;
     switch (actionType) {
     case ConsoleActions::DataIn:
 
         std::cout << "Enter numbers to process, divided by enter. Enter \"quit\" to stop entering" << "\r\n";
-
-        while (1){
+//        dataArr = new QByteArray();
+        *this << PADDING;
+        while (1) {
             std::string line;
             std::getline(std::cin, line);
             if (line == "quit") {
@@ -24,8 +29,11 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
                 break;
             } else {
                 bool isOk = false;
+
                 double tmp = QString::fromStdString(line).toDouble(&isOk);
                 if (isOk) {
+//                    dataArr->push_back(line.)
+                    ++dataCount;
                     std::cout << "data accepted" << std::endl;
                     *this << tmp << PADDING;
                 } else {
@@ -34,6 +42,9 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
                 }
             }
         }
+        m_buf.buffer().prepend(QString("%1").arg(dataCount).toLatin1());
+//        seek(0);
+//        *this << dataCount;
         break;
     case ConsoleActions::DataOut:
         //TODO

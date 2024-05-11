@@ -5,6 +5,8 @@
 
 FileInput::FileInput(QString filePath)
 {
+//    setCodec("Windows-1251");
+//    setAutoDetectUnicode(false);
     m_file = new QFile(filePath);
     if (m_file->exists()) {
         if (m_file->open(QIODevice::ReadOnly)) {
@@ -29,6 +31,4 @@ void FileInput::dataOutput(QSharedPointer<QByteArray> inp)
         *this << (*inp);
         flush();
     }
-
-
 }

@@ -1,8 +1,8 @@
 
 /**
  *   \file     node_info.h
- *   \version  0.03
- *   \date     2024.05.08
+ *   \version  0.04
+ *   \date     2024.05.09
  */
 
 #ifndef NODE_INFO_H
@@ -29,24 +29,32 @@ typedef struct
 enum class ModeNode {MN_WAIT, MN_WORK};
 
 
+/// IP и порт узла
+typedef struct
+{
+    QHostAddress ip;
+    quint16 port;
+} NodeID;
+
+
 /// Информация соседних узлов
 typedef struct
 {
-    quint32 mips;  /// вычислительная мощность
+    double mips;  /// вычислительная мощность
     quint32 priority;  /// приоритет
-    QHostAddress ip;
-    quint16 port;
+    NodeID node_id;  /// IP и порт узла
     bool compression;
 } NodeData;
 
 
-/// Информация текущего узла
+/// Информация об узлах
 typedef struct
 {
     ModeNode mode_node;  /// режим узла
-    quint32 mips;  /// вычислительная мощность
+    double mips;  /// вычислительная мощность
     quint32 priority;  /// приоритет
-    quint16 port;  /// порт
+    QHostAddress ip_host;  /// IP
+    quint16 port_host;  /// порт
     std::list<NodeData> neighbour_nodes;  /// информация соседних узлов
 } NodeInfo;
 

@@ -1,8 +1,8 @@
 
 /**
  *   \file     discovery_service.cpp
- *   \version  0.04
- *   \date     2024.05.08
+ *   \version  0.05
+ *   \date     2024.05.09
  */
 
 #include <QRegularExpression>
@@ -98,8 +98,8 @@ void DiscoveryService::receive_data_node(QByteArray &data)
 
 
     stream.setVersion(QDataStream::Qt_5_15);
-    stream >> node_data.ip;
-    stream >> node_data.port;
+    stream >> node_data.node_id.ip;
+    stream >> node_data.node_id.port;
     stream >> node_data.priority;
 
     // qDebug() << node_data.ip.toString();

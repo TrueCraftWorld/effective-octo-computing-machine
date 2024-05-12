@@ -52,7 +52,7 @@ TNode_Ethernet::TNode_Ethernet(QObject *parent, const Options_command_line &opti
     udp_socket_transmit = new QUdpSocket(this);
     udp_socket_transmit->setObjectName("udp_socket_sender");
 
-    if (udp_socket_transmit->bind(QHostAddress(QHostAddress::AnyIPv4), multicast_port, QUdpSocket::ShareAddress))
+    if (udp_socket_transmit->bind(QHostAddress(QHostAddress::AnyIPv4), 0))
     {
         udp_socket_transmit->setSocketOption(QAbstractSocket::MulticastTtlOption, qint32(Udp_socket_setting::TTL));
     }
@@ -119,7 +119,7 @@ void TNode_Ethernet::receive_datagram_multicast_mode(void)
         QNetworkDatagram n_datagram = udp_socket_receive->receiveDatagram();
 
 
-        if (n_datagram.senderPort() == multicast_port)
+        if (n_datagram.senderPort() != multicast_port)
         {
             QByteArray ba;
 

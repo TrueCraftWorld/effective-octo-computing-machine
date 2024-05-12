@@ -26,12 +26,9 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a_node(argc, argv);
     QCoreApplication::setApplicationName("Node");
-    QCoreApplication::setApplicationVersion("0.3");
+    QCoreApplication::setApplicationVersion("0.4");
     Options_command_line options_command_line = { static_cast<quint16>(Udp_socket_setting::MULTICAST_PORT),
                                                   default_ip,
-                                                  static_cast<quint16>(Udp_socket_setting::LOCAL_MODE_PORT),
-                                                  QHostAddress(QHostAddress::Any).toString(),
-                                                  false,
                                                   false };
 
     #ifdef Q_OS_WIN32
@@ -57,7 +54,6 @@ int main(int argc, char *argv[])
 static void parser_cmd_line(const QStringList &arg, Options_command_line &options_command_line)
 {
     QCommandLineOption cmd_line_option_verbose(QStringList() << "verbose", QCoreApplication::translate("main", "Подробный вывод."));
-    QCommandLineOption cmd_line_option_local_mode(QStringList() << "lm", QCoreApplication::translate("main", "Перевод узла в локальный режим работы (49002 - порт приема пакетов на стороне узла, а 49003 - порт назначения пакетов, отправляемых узлом)."));
     QCommandLineOption cmd_line_option_multicast_ip(QStringList() << "ip",
                                                     QCoreApplication::translate("main", "Задаем мультикастовый IP адрес. По умолчанию используется 225.1.1.130."),
                                                     QCoreApplication::translate("main", "IP адрес"));
@@ -71,60 +67,52 @@ static void parser_cmd_line(const QStringList &arg, Options_command_line &option
     cmd_line_parser.addHelpOption();
     cmd_line_parser.addVersionOption();
     cmd_line_parser.addOption(cmd_line_option_verbose);
-    cmd_line_parser.addOption(cmd_line_option_local_mode);
     cmd_line_parser.addOption(cmd_line_option_multicast_ip);
     cmd_line_parser.addOption(cmd_line_option_port);
     cmd_line_parser.process(arg);
 
     options_command_line.verbose = cmd_line_parser.isSet(cmd_line_option_verbose);
 
-    options_command_line.local_mode = cmd_line_parser.isSet(cmd_line_option_local_mode);
-    if (!options_command_line.local_mode)
+    qDebug() << "Узел работает в нормальном режиме.";
+
+    if ("" != cmd_line_parser.value(cmd_line_option_multicast_ip) && default_ip != cmd_line_parser.value(cmd_line_option_multicast_ip))
     {
-        qDebug() << "Узел работает в нормальном режиме.";
-        if ("" != cmd_line_parser.value(cmd_line_option_multicast_ip) && default_ip != cmd_line_parser.value(cmd_line_option_multicast_ip))
+        QRegExp reg("[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}");
+
+
+        if (cmd_line_parser.value(cmd_line_option_multicast_ip).contains(reg))
         {
-            QRegExp reg("[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}");
-
-
-            if (cmd_line_parser.value(cmd_line_option_multicast_ip).contains(reg))
-            {
-                options_command_line.multicast_ip = cmd_line_parser.value(cmd_line_option_multicast_ip);
-                qDebug() << "Установлен IP " << options_command_line.multicast_ip;
-            }
-            else
-            {
-                qDebug() << "Передан не верный IP адрес.";
-                qDebug() << "Будет установлен IP адрес по умолчанию," << default_ip;
-            }
+            options_command_line.multicast_ip = cmd_line_parser.value(cmd_line_option_multicast_ip);
+            qDebug() << "Установлен IP " << options_command_line.multicast_ip;
         }
         else
         {
-            qDebug() << "Установлен IP по умолчанию," << default_ip;
-        }
-
-        QString port_str = cmd_line_parser.value(cmd_line_option_port);
-        bool convert_ok;
-        quint16 port = static_cast<quint16>(port_str.toInt(&convert_ok));
-
-
-        if (convert_ok && (port > 1023) && port != static_cast<quint16>(Udp_socket_setting::MULTICAST_PORT))
-        {
-            options_command_line.multicast_port = port;
-            qDebug() << "Установлен порт " << options_command_line.multicast_port;
-        }
-        else if (port <= 1023)
-        {
-            qDebug() << "Задан порт из зарезервированного диапазона.";
-            qDebug() << "Установлен порт по умолчанию," << static_cast<quint16> ( Udp_socket_setting::MULTICAST_PORT );
-        }
-        else
-        {
-            qDebug() << "Установлен порт по умолчанию," << static_cast<quint16> ( Udp_socket_setting::MULTICAST_PORT );
+            qDebug() << "Передан не верный IP адрес.";
+            qDebug() << "Будет установлен IP адрес по умолчанию," << default_ip;
         }
     }
     else
     {
-        qDebug() << "Узел работает в локальном режиме.";
+        qDebug() << "Установлен IP по умолчанию," << default_ip;
+    }
+
+    QString port_str = cmd_line_parser.value(cmd_line_option_port);
+    bool convert_ok;
+    quint16 port = static_cast<quint16>(port_str.toInt(&convert_ok));
+
+
+    if (convert_ok && (port > 1023) && port != static_cast<quint16>(Udp_socket_setting::MULTICAST_PORT))
+    {
+        options_command_line.multicast_port = port;
+        qDebug() << "Установлен порт " << options_command_line.multicast_port;
+    }
+    else if (port <= 1023)
+    {
+        qDebug() << "Задан порт из зарезервированного диапазона.";
+        qDebug() << "Установлен порт по умолчанию," << static_cast<quint16> ( Udp_socket_setting::MULTICAST_PORT );
+    }
+    else
+    {
+        qDebug() << "Установлен порт по умолчанию," << static_cast<quint16> ( Udp_socket_setting::MULTICAST_PORT );
     }
 }

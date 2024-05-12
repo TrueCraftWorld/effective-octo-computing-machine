@@ -3,8 +3,10 @@
 #include <QTcpSocket>
 #include <QTimer>
 #include <QVector>
-#include <QtCore5Compat/QLinkedList>
+#include <list>
 #include <QByteArray>
+#include <QTextStream>
+#include <QDataStream>
 
 class Server : public QTcpServer
 {
@@ -15,15 +17,15 @@ public:
 
 private:
 	QTcpSocket* m_tempSocket;
-	QByteArray m_dataStorage;
+	QSharedPointer<QByteArray> m_dataStorage;
 	quint64 m_waitedBytes;
 	bool m_isAwaitingAdditionalData;
 private:
 	void InitializeSocket(QTcpSocket* socket);
-	void ReadDataFromTcp();
+	void ReadDataFromTcp(QDataStream* stream, const qint64 bytesAvailable);
 
 signals:
-	void signalSendDataToSerializer(QByteArray msg);
+	void signalSendDataToSerializer(QSharedPointer<QByteArray> ptrMsg);
 	void signalSocketDisconnected(QTcpSocket* socketForDisconnect);
 	void signalSocketConnected(QTcpSocket* socketForConnect, QHostAddress ip4, quint16 port);
 

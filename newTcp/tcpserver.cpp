@@ -2,6 +2,8 @@
 #include <QStack>
 #include <QFile>
 #include <fstream>
+#include <QTextStream>
+#include <QDataStream>
 #include <cmath>
 
 constexpr quint16 KEY_PROGRAM = 132;
@@ -48,19 +50,20 @@ void Server::slotReadyRead()
 	QDataStream streamIn(m_tempSocket);
 	unsigned char op;
 
+	const qint64 bytesAvailable = m_tempSocket->bytesAvailable();
+
 	// If not all the data came in at once, expect an additional packet
 	if (m_isAwaitingAdditionalData)
 	{
-		ReadDataFromTcp();
+		ReadDataFromTcp(&streamIn, bytesAvailable);
 		if (m_waitedBytes == 0)
 		{
 			emit signalSendDataToSerializer(m_dataStorage);
-			m_dataStorage.clear();
 			m_isAwaitingAdditionalData = false;
 		}
 		return;
 	}
-	else if (m_tempSocket->bytesAvailable() < 10)
+	else if (bytesAvailable < 10)
 	{
 		return;
 	}
@@ -75,13 +78,15 @@ void Server::slotReadyRead()
 	}
 	else 
 	{
+		m_dataStorage = QSharedPointer<QByteArray>(new QByteArray());
+
 		streamIn >> m_waitedBytes;
 
 		// At first reading m_waitedBytes == 0 only if it is connectionCheck
 		if (m_waitedBytes == 0)
 			return;
 
-		ReadDataFromTcp();
+		ReadDataFromTcp(&streamIn, bytesAvailable);
 		
 		if (m_waitedBytes != 0)
 		{
@@ -90,15 +95,14 @@ void Server::slotReadyRead()
 		else
 		{
 			emit signalSendDataToSerializer(m_dataStorage);
-			m_dataStorage.clear();
 		}
 	}
 }
 
-void Server::ReadDataFromTcp() 
+void Server::ReadDataFromTcp(QDataStream *stream, const qint64 bytesAvailable)
 {
-	quint64 minForRead = qMin<>(m_waitedBytes, quint64(m_tempSocket->bytesAvailable()));
-	m_dataStorage.append(m_tempSocket->read(minForRead)); // BUG, TODO: Change m_tempSocket to QDataStream
+	quint64 minForRead = qMin<>(m_waitedBytes, quint64(bytesAvailable));
+	stream->readRawData(m_dataStorage->data(), minForRead);
 	m_waitedBytes -= minForRead;
 }
 

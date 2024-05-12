@@ -1,16 +1,16 @@
 
 /**
  *   \file     main.cpp
- *   \version  0.03
- *   \date     2024.05.08
+ *   \version  0.04
+ *   \date     2024.05.12
  *   \mainpage
  */
+
+#include "node.h"
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
 #include <QCommandLineOption>
-
-#include "node.h"
 
 
 static void parser_cmd_line(const QStringList &arg, Options_command_line &options_command_line);

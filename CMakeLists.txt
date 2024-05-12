@@ -19,6 +19,11 @@ add_executable(Node
   discovery_service.h discovery_service.cpp
   tnode_ethernet.h tnode_ethernet.cpp
   data_storage_processing.h data_storage_processing.cpp
+  power_meter.h power_meter.cpp
+  commands.h
+  loger.h
+  compute_core.h compute_core.cpp
+  element.h element.cpp
 )
 target_link_libraries(Node Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network)
 

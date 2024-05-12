@@ -5,10 +5,10 @@
  *   \date     2024.05.12
  */
 
+#include "data_storage_processing.h"
+
 #include <cmath>
 #include <QRegularExpression>
-
-#include "data_storage_processing.h"
 
 
 static bool compare_pair(const QPair<QString, QVector<double>> &value1,
@@ -113,6 +113,7 @@ void DataStorageProcessing::init_tasker(NodeInfo &node_info)
     for (auto it = data_tasker.begin(); it != data_tasker.end(); ++it)
     {
         qDebug() << it->first << it->second.size();
+        it->second.clear();
     }
 }
 
@@ -156,13 +157,11 @@ void DataStorageProcessing::fill_data(QVector<double> &data)
 
                     if (data.size() < size_qvectors)
                     {
-                        data_tasker[i].second.clear();
                         data_tasker[i].second = data.mid(amount_data_process, data.size() - amount_data_process);
                         amount_data_process += data.size();
                     }
                     else
                     {
-                        data_tasker[i].second.clear();
                         data_tasker[i].second = data.mid(amount_data_process, amount_data_nodes[i]);
                         amount_data_process += amount_data_nodes[i];
                     }
@@ -181,14 +180,12 @@ void DataStorageProcessing::fill_data(QVector<double> &data)
 
                     if (data.size() < size_qvectors - amount_data_process)
                     {
-                        data_tasker[i].second.clear();
                         data_tasker[i].second = buf;
                         data_tasker[i].second += data.mid(0, data.size());
                         amount_data_process += data.size();
                     }
                     else if (!buf.isEmpty())
                     {
-                        data_tasker[i].second.clear();
                         data_tasker[i].second = buf;
                         data_tasker[i].second += data.mid(0, amount_data_nodes[i] - amount_data_process);
                         amount_data_process += amount_data_nodes[i] - amount_data_process;
@@ -196,7 +193,6 @@ void DataStorageProcessing::fill_data(QVector<double> &data)
                     }
                     else
                     {
-                        data_tasker[i].second.clear();
                         data_tasker[i].second = data.mid(amount_data_process - buf_size, amount_data_nodes[i]);
                         amount_data_process += amount_data_nodes[i];
                     }

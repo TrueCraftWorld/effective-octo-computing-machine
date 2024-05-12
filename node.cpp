@@ -5,8 +5,10 @@
  *   \date     2024.05.12
  */
 
-#include <QRandomGenerator>
 #include "node.h"
+#include "power_meter.h"
+
+#include <QRandomGenerator>
 
 
 /**
@@ -23,8 +25,8 @@ Node::Node(QObject *parent, const Options_command_line &options_command_line)
     m_node_info.port_host = options_command_line.multicast_port;
     qDebug() << "Приоритет узла:" << m_node_info.priority;
 
-    /* TODO: сдесь реализовать бенчмарк */
-    m_node_info.mips = QRandomGenerator::global()->bounded(1, 1000000);  /// TODO: заглушка бенчмарка, проверить в диапазоне от 0 до 1, удалить
+    PowerMeter pow;
+    m_node_info.mips = pow.power_check();
     qDebug() << "Вычислительная мощность узла:" << m_node_info.mips;
     m_discovery_service = new DiscoveryService(parent, options_command_line);
     m_discovery_service->setObjectName("dis");
@@ -128,10 +130,10 @@ NodeInfo &Node::get_node_info()
  *   \param   amount_processed_data - количество обрабатываемых данных
  *   \retval  Нет
  */
-//void Node::connect_client(quint64 amount_processed_data)
-void Node::connect_client()
+void Node::connect_client(quint64 amount_processed_data)
+//void Node::connect_client()
 {
-    quint64 amount_processed_data = 1000000;  /// TODO: заглушка количества обрабатываемых данных, удалить
+    //quint64 amount_processed_data = 1000000;  /// TODO: заглушка количества обрабатываемых данных, удалить
     qDebug() << "Количество узлов в вычислительном кластере" << m_node_info.neighbour_nodes.size() + 1;
     qDebug() << "Вычислительная мощьность текущего узла" << m_node_info.mips;
     if (!m_node_info.neighbour_nodes.empty())
@@ -144,12 +146,12 @@ void Node::connect_client()
             // qDebug() << it->node_id.ip;
             // qDebug() << it->node_id.port;
             // qDebug() << it->priority;
-            it->mips = QRandomGenerator::global()->bounded(1, 1000000);  /// TODO: заглушка вычилсительной мощности, удалить
+            //it->mips = QRandomGenerator::global()->bounded(1, 1000000);  /// TODO: заглушка вычилсительной мощности, удалить
             // qDebug() << it->mips;
         }
     }
 
-    //m_data_storage_processing = new DataStorageProcessing(this, is_selected_node, m_node_info, amount_processed_data);
-    m_data_storage_processing = new DataStorageProcessing(this, true, m_node_info, amount_processed_data);  /// TODO: заглушка, замениьт на строку выше, а эту удалить
+    m_data_storage_processing = new DataStorageProcessing(this, is_selected_node, m_node_info, amount_processed_data);
+    //m_data_storage_processing = new DataStorageProcessing(this, true, m_node_info, amount_processed_data);  /// TODO: заглушка, замениьт на строку выше, а эту удалить
     m_data_storage_processing->setObjectName("dst");
 }

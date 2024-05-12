@@ -1,15 +1,15 @@
 
 /**
  *   \file     discovery_service.cpp
- *   \version  0.05
- *   \date     2024.05.09
+ *   \version  0.06
+ *   \date     2024.05.12
  */
-
-#include <QRegularExpression>
-#include <QDataStream>
 
 #include "discovery_service.h"
 #include "node.h"
+
+#include <QRegularExpression>
+#include <QDataStream>
 
 
 /**

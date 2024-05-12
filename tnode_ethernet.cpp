@@ -1,17 +1,17 @@
 
 /**
  *   \file     tnode_ethernet.cpp
- *   \version  0.04
- *   \date     2024.05.08
+ *   \version  0.05
+ *   \date     2024.05.12
  */
+
+#include "tnode_ethernet.h"
+#include "node.h"
 
 #include <QDataStream>
 #include <QAbstractSocket>
 #include <QNetworkInterface>
 #include <QRegularExpression>
-
-#include "tnode_ethernet.h"
-#include "node.h"
 
 
 /**

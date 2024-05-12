@@ -8,11 +8,11 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include <QObject>
-
 #include "node_info.h"
 #include "discovery_service.h"
 #include "data_storage_processing.h"
+
+#include <QObject>
 
 
 class Node : public QObject
@@ -31,8 +31,8 @@ signals:
 
 public slots:
     void node_data(NodeData &node_data);  /// данные соседнего узла
-    //void connect_client(quint64 np_data);  /// подключился клиент
-    void connect_client();  /// TODO: заглушка заменить на строку выше, эту строку удалить
+    void connect_client(quint64 np_data);  /// подключился клиент
+    //void connect_client();  /// TODO: заглушка заменить на строку выше, эту строку удалить
 
 private:
     NodeInfo m_node_info;

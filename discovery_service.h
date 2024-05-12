@@ -1,18 +1,18 @@
 
 /**
  *   \file     discovery_service.h
- *   \version  0.03
- *   \date     2024.05.07
+ *   \version  0.04
+ *   \date     2024.05.12
  */
 
 #ifndef DISCOVERYSERVICE_H
 #define DISCOVERYSERVICE_H
 
-#include <QObject>
-#include <QTimer>
-
 #include "tnode_ethernet.h"
 #include "node_info.h"
+
+#include <QObject>
+#include <QTimer>
 
 
 class DiscoveryService : public QObject

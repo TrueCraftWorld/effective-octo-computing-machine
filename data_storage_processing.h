@@ -1,18 +1,18 @@
 
 /**
  *   \file     data_storage_processing.h
- *   \version  0.03
- *   \date     2024.05.11
+ *   \version  0.04
+ *   \date     2024.05.12
  */
 
 #ifndef DATASTORAGEPROCESSING_H
 #define DATASTORAGEPROCESSING_H
 
+#include "node_info.h"
+
 #include <QObject>
 #include <QMap>
 #include <QVector>
-
-#include "node_info.h"
 
 
 class DataStorageProcessing : public QObject
@@ -37,9 +37,7 @@ private:
     QVector<double> amount_data_nodes;  /// нормированная производительность, количество данных на узелы
     quint64 amount_data_process;  /// количество данных на обработку
     quint64 amount_processed_data;  /// количество обрабатываемых данных
-    //quint64 data_in_vector;  /// количество данных в векторе
-    //quint32 count_node;  /// количество узлов в сети
-    bool is_selected_node;  ///
+    bool is_selected_node;  /// признак в каком режиме работает узел (планировщик задач или вычислительный узел)
 
     void init_tasker(NodeInfo &node_info);  /// инициализация в режиме планировщика задач
     void init_worker();  /// инициализация в режиме вычислительного узла

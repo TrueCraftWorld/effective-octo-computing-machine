@@ -1,19 +1,19 @@
 
 /**
  *   \file     tnode_ethernet.h
- *   \version  0.04
- *   \date     2024.05.08
+ *   \version  0.05
+ *   \date     2024.05.12
  */
 
 #ifndef TNODE_ETHERNET_H
 #define TNODE_ETHERNET_H
 
+#include "node_info.h"
+
 #include <QObject>
 #include <QUdpSocket>
 #include <QByteArray>
 #include <QNetworkDatagram>
-
-#include "node_info.h"
 
 
 class TNode_Ethernet : public QObject

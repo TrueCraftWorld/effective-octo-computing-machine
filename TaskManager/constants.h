@@ -19,10 +19,10 @@ constexpr quint8 CTAN = 0x09;
 constexpr quint8 DIV = 0x0A;
 constexpr quint8 END = 0x0B;
 
-constexpr quint8 DATA_INFO = 0xA0;
-constexpr quint8 DATA_IN = 0xD0;
-constexpr quint8 DATA_OUT = 0xE0;
-constexpr quint8 FORMULA = 0xCA;
+constexpr quint16 DATA_INFO =   0xA0;
+constexpr quint16 DATA_IN =     0xD0;
+constexpr quint16 DATA_OUT =    0xE0;
+constexpr quint16 FORMULA =     0xCA;
 
 constexpr quint16 KEY = 132;
 

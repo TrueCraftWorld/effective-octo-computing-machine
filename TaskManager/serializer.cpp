@@ -19,7 +19,6 @@ void SerialiZer::processDataInput(QTextStream &input)
     quint64 dataCount = 0;
     QTextStream stream(dataStorage.get(), QIODevice::ReadWrite);
     stream.setAutoDetectUnicode(false);
-//    stream.setCodec("windows-1251");
     QString line;
     input >> line;
     dataCount = line.toInt();
@@ -29,34 +28,22 @@ void SerialiZer::processDataInput(QTextStream &input)
 
     //sending datainfo ahead
     QTextStream dataInfoStream(dataInfo.get(), QIODevice::ReadWrite);
-//    QByteArray dataInfoStupidAddOn = QByteArrayLiteral("\xA0");
-    dataInfoStream.setAutoDetectUnicode(false);
-    dataInfoStream.setCodec("windows-1251");
-    dataInfoStream << PADDING << dataCount << PADDING;
+    dataInfoStream << DATA_INFO << PADDING << dataCount << PADDING;
     dataInfoStream.flush();
-    dataInfo->prepend(DATA_INFO);
     emit messageReady(dataInfo);
     qDebug() << "dataInfo";
-//    qDebug() << (*dataInfo);
-
+    stream << DATA_IN;
     while (!input.atEnd()) {
         stream << PADDING;
         line.clear();
         input >> line;
         stream << line;
-//        dataCount++;
     }
-//    stream.seek(0);
+
     stream.flush();
     input.device()->close();
 
-
-
-    //awakward way to add info to bytearray
-//    QByteArray packInfo;
-//    packInfo.append(DATA_IN);
-//    packInfo.append(PADDING);
-    dataStorage->prepend(DATA_IN);
+//    dataStorage->prepend(DATA_IN);
     emit messageReady(dataStorage);
     qDebug() << "sentData";
 }
@@ -65,8 +52,7 @@ void SerialiZer::processReturnData(QSharedPointer<QByteArray> arr)
 {
    QTextStream input(arr.get());
    input.setAutoDetectUnicode(false);
-//   input.setCodec("windows-1251");
-   char packageId;
+   quint16 packageId;
    input >> packageId;
 
    //NEED to decomment line below in prod
@@ -84,7 +70,7 @@ void SerialiZer::processFormula(QTextStream & input)
     if (m_workMode == SerialMode::SEND_CHAR) {
         QTextStream stream(dataStorage.get(),QIODevice::ReadWrite);
         stream.setAutoDetectUnicode(false);
-        stream.setCodec("windows-1251");
+//        stream.setCodec("windows-1251");
         stream << START;
         while (!input.atEnd()) { // выглядит как оверкилл, но количество строк считаем и кастим к байт арррею
             stream  << PADDING;
@@ -119,12 +105,12 @@ void SerialiZer::processFormula(QTextStream & input)
         input.device()->close();
     }
     QByteArray packInfo;
-//    QTextStream stream2(packInfo, QIODevice::ReadWrite);
-//    stream2 << FORMULA << PADDING;
-//    stream2.flush();
-    packInfo.append(FORMULA);
-    packInfo.append(PADDING);
-    dataStorage->prepend(packInfo);
+    QTextStream stream2(packInfo, QIODevice::ReadWrite);
+    stream2 << FORMULA << PADDING;
+    stream2.flush();
+//    packInfo.append(FORMULA);
+//    packInfo.append(PADDING);
+//    dataStorage->prepend(packInfo);
     emit messageReady(dataStorage);
     qDebug() << "sentFormula";
 }

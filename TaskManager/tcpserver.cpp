@@ -7,12 +7,12 @@
 
 constexpr quint16 KEY_PROGRAM = 132;
 
-constexpr unsigned char PKG_DATAINFO = 0xA0;
-constexpr unsigned char PKG_DATAPREP = 0xB0;
-constexpr unsigned char PKG_FORMULA = 0xC0;
-constexpr unsigned char PKG_DATAARRAY = 0xD0;
-constexpr unsigned char PKG_DATAMODIFIED = 0xE0;
-constexpr unsigned char PKG_CONNECTIONCHECK = 0xF0;
+constexpr quint16 PKG_DATAINFO = 0xA0;
+constexpr quint16 PKG_DATAPREP = 0xB0;
+constexpr quint16 PKG_FORMULA = 0xC0;
+constexpr quint16 PKG_DATAARRAY = 0xD0;
+constexpr quint16 PKG_DATAMODIFIED = 0xE0;
+constexpr quint16 PKG_CONNECTIONCHECK = 0xF0;
 
 constexpr char PADDING = '\n';
 
@@ -36,21 +36,14 @@ void Server::SendMessageToNode(QTcpSocket* socket, QSharedPointer<QByteArray> ms
     QByteArray temp_msg;
     temp_msg.clear();
 
-
-//    temp_msg.push_back(PADDING);
-
-
     temp_msg.push_back("132");
     temp_msg.push_back(PADDING);
     temp_msg.push_back(QString("%1").arg(msg->size()).toLatin1());
     temp_msg.push_back(PADDING);
     temp_msg.push_back(*msg);
 
-//	if (socket != nullptr)
-//	{
+
     socket->write(temp_msg);
-//        socket->
-//	}
 }
 
 void Server::slotReadyRead()

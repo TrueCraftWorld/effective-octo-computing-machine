@@ -24,12 +24,13 @@ public:
                                    NodeInfo &node_info,
                                    quint64 amount_processed_data = 0);
     ~DataStorageProcessing();
-    void fill_data(QVector<double> &data);
 
 signals:
 
 public slots:
-
+    void fill_data(QVector<double> &data);
+    QVector<QPair<QString, QVector<double>>> &get_data_tasker();
+    QVector<double> &get_data_worker();
 
 private:
     QVector<QPair<QString, QVector<double>>> data_tasker;  /// данные для обработки в режиме планировщика задач

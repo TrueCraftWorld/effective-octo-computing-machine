@@ -219,6 +219,28 @@ void DataStorageProcessing::fill_data(QVector<double> &data)
 
 
 /**
+ *   \brief   Функция возвращает данные планировщика задач
+ *   \param   Нет
+ *   \retval  Данные планировщика задач
+ */
+QVector<QPair<QString, QVector<double>>> &DataStorageProcessing::get_data_tasker()
+{
+    return data_tasker;
+}
+
+
+/**
+ *   \brief   Функция возвращает данные вычислительного узла
+ *   \param   Нет
+ *   \retval  Данные вычислительного узла
+ */
+QVector<double> &DataStorageProcessing::get_data_worker()
+{
+    return data_worker;
+}
+
+
+/**
  *   \brief   Поиск свободного узла
  *   \param   Нет
  *   \retval  Свободный узел

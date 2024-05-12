@@ -42,7 +42,7 @@ private:
     void init_tasker(NodeInfo &node_info);  /// инициализация в режиме планировщика задач
     void init_worker();  /// инициализация в режиме вычислительного узла
     quint32 search_required_nodes(quint32 size);  /// поиск необходимых узлов
-    quint32 search_free_nodes(quint64 amount_data_process);  /// поиск свободного узла
+    quint32 search_free_nodes();  /// поиск свободного узла
 };
 
 #endif // DATASTORAGEPROCESSING_H

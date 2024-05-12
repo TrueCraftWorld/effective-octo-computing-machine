@@ -115,6 +115,19 @@ void DataStorageProcessing::init_tasker(NodeInfo &node_info)
         qDebug() << it->first << it->second.size();
         it->second.clear();
     }
+
+    /* TODO: для отработки, удалить, начало */
+    // QVector<double> data;
+
+    // amount_data_process = 990000;
+    // data.resize(10000);
+    // for (quint32 i = 0; i < data.size(); ++i)
+    // {
+        // data[i] = i * 1.0;
+    // }
+    // data_tasker[0].second.resize(amount_data_process);
+    // fill_data(data);
+    /* TODO: для отработки, удалить, конец */
 }
 
 
@@ -136,7 +149,7 @@ void DataStorageProcessing::init_worker()
  */
 void DataStorageProcessing::fill_data(QVector<double> &data)
 {
-    if (amount_processed_data > amount_data_process)
+    if (amount_processed_data >= (amount_data_process + data.size()))
     {
         if (!is_selected_node)
         {
@@ -169,7 +182,7 @@ void DataStorageProcessing::fill_data(QVector<double> &data)
             }
             else
             {
-                quint32 free_node = search_free_nodes(amount_data_process);
+                quint32 free_node = search_free_nodes();
                 quint64 size_qvectors = 0;
                 QVector<double> buf = data_tasker[free_node].second.mid(0, amount_data_process);
                 quint64 buf_size = buf.size();
@@ -180,12 +193,14 @@ void DataStorageProcessing::fill_data(QVector<double> &data)
 
                     if (data.size() < size_qvectors - amount_data_process)
                     {
+                        data_tasker[i].second.clear();
                         data_tasker[i].second = buf;
                         data_tasker[i].second += data.mid(0, data.size());
                         amount_data_process += data.size();
                     }
                     else if (!buf.isEmpty())
                     {
+                        data_tasker[i].second.clear();
                         data_tasker[i].second = buf;
                         data_tasker[i].second += data.mid(0, amount_data_nodes[i] - amount_data_process);
                         amount_data_process += amount_data_nodes[i] - amount_data_process;
@@ -208,18 +223,18 @@ void DataStorageProcessing::fill_data(QVector<double> &data)
  *   \param   Нет
  *   \retval  Свободный узел
  */
-quint32 DataStorageProcessing::search_free_nodes(quint64 amount_data_process)
+quint32 DataStorageProcessing::search_free_nodes()
 {
     quint32 free_node = 0;
-    quint64 size_nodes = data_tasker[0].second.size();
+    quint64 size_nodes = 0;
 
 
-    for (quint32 i = 1; i < data_tasker.size(); ++i)
+    for (quint32 i = 0; i < data_tasker.size(); ++i)
     {
         if (size_nodes < amount_data_process)
         {
-            size_nodes += data_tasker[i].second.size();
-            free_node = i - 1;
+            size_nodes += amount_data_nodes[i];
+            free_node = i;
         }
         else
         {
@@ -241,14 +256,14 @@ quint32 DataStorageProcessing::search_free_nodes(quint64 amount_data_process)
 quint32 DataStorageProcessing::search_required_nodes(quint32 size)
 {
     quint32 amont_required_nodes = 1;
-    quint64 size_nodes = data_tasker[0].second.size();
+    quint64 size_nodes = amount_data_nodes[0];
 
 
     for (quint32 i = 1; i < data_tasker.size(); ++i)
     {
-        if (size_nodes < size)
+        if (size_nodes < size + amount_data_process)
         {
-            size_nodes += data_tasker[i].second.size();
+            size_nodes += amount_data_nodes[i];
             amont_required_nodes = i + 1;
         }
         else

@@ -27,10 +27,28 @@ Node::Node(QObject *parent, const Options_command_line &options_command_line)
 
     PowerMeter pow;
     m_node_info.mips = pow.power_check();
+    // m_node_info.mips = QRandomGenerator::global()->bounded(1, 1000000);  /// TODO: заглушка бенчмарка, удалить
     qDebug() << "Вычислительная мощность узла:" << m_node_info.mips;
     m_discovery_service = new DiscoveryService(parent, options_command_line);
     m_discovery_service->setObjectName("dis");
     connect(m_discovery_service, &DiscoveryService::data_ready, this, &Node::node_data);
+
+    /* TODO: удалить, начало */
+    // timer = new  QTimer(parent);
+    // timer->setObjectName("timer_1hz");
+    // connect(timer, &QTimer::timeout, this, &Node::connect_client);
+
+
+    // if (!timer->isActive())
+    // {
+    //     timer->start(20000);
+    // }
+    // else
+    // {
+    //     timer->stop();
+    //     timer->start(20000);
+    // }
+    /* конец */
 }
 
 
@@ -43,6 +61,13 @@ Node::~Node()
 {
     m_discovery_service->deleteLater();
     m_data_storage_processing->deleteLater();
+
+    // if (timer->isActive())
+    // {
+    //     timer->stop();
+    // }
+
+    // timer->deleteLater();
 }
 
 
@@ -131,9 +156,9 @@ NodeInfo &Node::get_node_info()
  *   \retval  Нет
  */
 void Node::connect_client(quint64 amount_processed_data)
-//void Node::connect_client()
+// void Node::connect_client()
 {
-    //quint64 amount_processed_data = 1000000;  /// TODO: заглушка количества обрабатываемых данных, удалить
+    // quint64 amount_processed_data = 1000000;  /// TODO: заглушка количества обрабатываемых данных, удалить
     qDebug() << "Количество узлов в вычислительном кластере" << m_node_info.neighbour_nodes.size() + 1;
     qDebug() << "Вычислительная мощьность текущего узла" << m_node_info.mips;
     if (!m_node_info.neighbour_nodes.empty())
@@ -146,12 +171,12 @@ void Node::connect_client(quint64 amount_processed_data)
             // qDebug() << it->node_id.ip;
             // qDebug() << it->node_id.port;
             // qDebug() << it->priority;
-            //it->mips = QRandomGenerator::global()->bounded(1, 1000000);  /// TODO: заглушка вычилсительной мощности, удалить
+            // it->mips = QRandomGenerator::global()->bounded(1, 1000000);  /// TODO: заглушка вычилсительной мощности, удалить
             // qDebug() << it->mips;
         }
     }
 
     m_data_storage_processing = new DataStorageProcessing(this, is_selected_node, m_node_info, amount_processed_data);
-    //m_data_storage_processing = new DataStorageProcessing(this, true, m_node_info, amount_processed_data);  /// TODO: заглушка, замениьт на строку выше, а эту удалить
+    // m_data_storage_processing = new DataStorageProcessing(this, true, m_node_info, amount_processed_data);  /// TODO: заглушка, замениьт на строку выше, а эту удалить
     m_data_storage_processing->setObjectName("dst");
 }

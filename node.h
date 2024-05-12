@@ -32,13 +32,13 @@ signals:
 public slots:
     void node_data(NodeData &node_data);  /// данные соседнего узла
     void connect_client(quint64 np_data);  /// подключился клиент
-    //void connect_client();  /// TODO: заглушка заменить на строку выше, эту строку удалить
+    // void connect_client();  /// TODO: заглушка заменить на строку выше, эту строку удалить
 
 private:
     NodeInfo m_node_info;
     DiscoveryService *m_discovery_service = nullptr;
     DataStorageProcessing *m_data_storage_processing = nullptr;
-    QTimer *timer = nullptr;  /// TODO: для отладки, удалить
+    // QTimer *timer = nullptr;  /// TODO: для отладки, удалить
     bool is_selected_node;
 };
 

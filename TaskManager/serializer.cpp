@@ -42,8 +42,6 @@ void SerialiZer::processDataInput(QTextStream &input)
 
     stream.flush();
     input.device()->close();
-
-//    dataStorage->prepend(DATA_IN);
     emit messageReady(dataStorage);
     qDebug() << "sentData";
 }
@@ -56,7 +54,7 @@ void SerialiZer::processReturnData(QSharedPointer<QByteArray> arr)
    input >> packageId;
 
    //NEED to decomment line below in prod
-//   if (packageId != DATA_OUT) return;
+   if (packageId != DATA_OUT) return;
 
    emit resultsAccepted(arr);
 }
@@ -64,13 +62,9 @@ void SerialiZer::processReturnData(QSharedPointer<QByteArray> arr)
 void SerialiZer::processFormula(QTextStream & input)
 {
     QSharedPointer<QByteArray> dataStorage (new QByteArray());
-    input.setAutoDetectUnicode(false);
-//    input.setCodec("windows-1251");
     input.device()->reset();
     if (m_workMode == SerialMode::SEND_CHAR) {
         QTextStream stream(dataStorage.get(),QIODevice::ReadWrite);
-        stream.setAutoDetectUnicode(false);
-//        stream.setCodec("windows-1251");
         stream << START;
         while (!input.atEnd()) { // выглядит как оверкилл, но количество строк считаем и кастим к байт арррею
             stream  << PADDING;
@@ -108,9 +102,6 @@ void SerialiZer::processFormula(QTextStream & input)
     QTextStream stream2(packInfo, QIODevice::ReadWrite);
     stream2 << FORMULA << PADDING;
     stream2.flush();
-//    packInfo.append(FORMULA);
-//    packInfo.append(PADDING);
-//    dataStorage->prepend(packInfo);
     emit messageReady(dataStorage);
     qDebug() << "sentFormula";
 }

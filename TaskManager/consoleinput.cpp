@@ -8,17 +8,13 @@
 
 ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
 {
-//    setCodec("windows-1251");
-    setAutoDetectUnicode(false);
     setDevice(&m_buf);
     device()->open(QIODevice::ReadWrite);
     int dataCount = 0;
-//    QByteArray * dataArr;
     switch (actionType) {
     case ConsoleActions::DataIn:
 
         std::cout << "Enter numbers to process, divided by enter. Enter \"quit\" to stop entering" << "\r\n";
-//        dataArr = new QByteArray();
         *this << PADDING;
         while (1) {
             std::string line;
@@ -32,7 +28,6 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
 
                 double tmp = QString::fromStdString(line).toDouble(&isOk);
                 if (isOk) {
-//                    dataArr->push_back(line.)
                     ++dataCount;
                     std::cout << "data accepted" << std::endl;
                     *this << tmp << PADDING;
@@ -43,12 +38,8 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
             }
         }
         m_buf.buffer().prepend(QString("%1").arg(dataCount).toLatin1());
-//        seek(0);
-//        *this << dataCount;
         break;
     case ConsoleActions::DataOut:
-        //TODO
-        //justfine
         break;
     case ConsoleActions::Formula:
         std::cout << "Enter formula in reverse Polish. every input on new line. Enter \"quit\" to stop entering" << "\r\n";
@@ -65,7 +56,6 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
                 *this << QString::fromStdString(line) << PADDING;
             } else {
                 std::cout << "smth wrong, data dropped" << std::endl;
-//                break;
             }
         }
         break;
@@ -89,7 +79,7 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
     case ConsoleActions::TargetIP:
         std::cout << "Enter IP4 addr of node in form xxx.xxx.xxx.xxx" << "\r\n";
 
-        while (1){
+        while (1) {
             std::string line;
             std::getline(std::cin, line);
             if (line == "quit") {
@@ -102,7 +92,6 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
                 break;
             }
         }
-
         break;
     }
 }

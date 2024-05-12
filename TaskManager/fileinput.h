@@ -13,7 +13,6 @@ public:
     void dataOutput(QSharedPointer<QByteArray>) override;
 signals:
     QFile *m_file;
-//    QByteArray m_arr;
 };
 
 #endif // FILEINPUT_H

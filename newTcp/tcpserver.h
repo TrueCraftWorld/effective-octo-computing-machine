@@ -22,7 +22,7 @@ private:
 	bool m_isAwaitingAdditionalData;
 private:
 	void InitializeSocket(QTcpSocket* socket);
-	void ReadDataFromTcp(QDataStream* stream, const qint64 bytesAvailable);
+	void ReadDataFromTcp(QDataStream* stream, qint64& bytesAvailable);
 
 signals:
 	void signalSendDataToSerializer(QSharedPointer<QByteArray> ptrMsg);

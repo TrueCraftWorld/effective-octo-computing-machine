@@ -33,7 +33,9 @@ void MockNode::slotCheckConnections()
 {
 	for (const auto& info : m_nodeInfo.neighbour_nodes)
 	{
-		m_tcpServer.SendMessageToNode(info.socket, "");
+		QByteArray emptyArray;
+		emptyArray.reserve(0);
+		m_tcpServer.SendMessageToNode(info.socket, emptyArray);
 	}
 }
 

@@ -1,8 +1,9 @@
 #ifndef ABSTRACTOUTPUT_H
 #define ABSTRACTOUTPUT_H
-#include <QTextStream>
+//#include <QTextStream>
+#include <QDataStream>
 
-class AbstractOutput : public QTextStream
+class AbstractOutput : public QDataStream
 {
 public:
     virtual void dataOutput(QSharedPointer<QByteArray>) = 0;

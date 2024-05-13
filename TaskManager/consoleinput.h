@@ -3,17 +3,20 @@
 #include "constants.h"
 #include "constants.h"
 #include "abstractoutput.h"
-#include <QTextStream>
+//#include <QTextStream>
 #include <QBuffer>
 
 class ConsoleInput : public AbstractOutput
 {
 public:
     ConsoleInput(const ConsoleActions&);
-    void dataOutput(QSharedPointer<QByteArray>) override;
+
+
+    void dataOutput(QSharedPointer<QByteArray>) override final;
 
 private:
-    QBuffer m_buf;
+//    QBuffer m_buf;
+    QByteArray m_ba;
 
 };
 

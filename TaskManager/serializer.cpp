@@ -1,6 +1,8 @@
 #include "serializer.h"
+
 #include "constants.h"
-#include <QTextStream>
+#include <iostream>
+#include <QDataStream>
 #include <QSharedPointer>
 #include <QDebug>
 
@@ -11,46 +13,49 @@ SerialiZer::SerialiZer(QObject *parent)
 
 }
 
-void SerialiZer::processDataInput(QTextStream &input)
+void SerialiZer::processDataInput(AbstractOutput * input)
 {
     QSharedPointer<QByteArray> dataStorage (new QByteArray());
 
-    input.device()->reset(); //sets position to 0 in all IO diveces but Qstring
+    input->device()->reset(); //sets position to 0 in all IO diveces but Qstring
     quint64 dataCount = 0;
-    QTextStream stream(dataStorage.get(), QIODevice::ReadWrite);
-    stream.setAutoDetectUnicode(false);
-    QString line;
-    input >> line;
-    dataCount = line.toInt();
+
+    QDataStream stream(dataStorage.get(), QIODevice::ReadWrite);
+    stream.setVersion(QDataStream::Qt_5_15);
+    *input >> dataCount;
 
     QSharedPointer<QByteArray> dataInfo (new QByteArray());  //dataInfo litrally can be formed only in here
     dataInfo->clear();
+    QDataStream dataInfoStream(dataInfo.get(), QIODevice::ReadWrite);
+    dataInfoStream.setVersion(QDataStream::Qt_5_15);
+    dataInfoStream << DATA_INFO << dataCount;
 
-    //sending datainfo ahead
-    QTextStream dataInfoStream(dataInfo.get(), QIODevice::ReadWrite);
-    dataInfoStream << DATA_INFO << PADDING << dataCount << PADDING;
-    dataInfoStream.flush();
+
     emit messageReady(dataInfo);
     qDebug() << "dataInfo";
     stream << DATA_IN;
-    while (!input.atEnd()) {
-        stream << PADDING;
-        line.clear();
-        input >> line;
+
+    while (!input->atEnd()) {
+
+        double line = 0;
+        *input >> line;
         stream << line;
+        std::cout << line << std::endl;
     }
 
-    stream.flush();
-    input.device()->close();
+//    stream.flush();
+    input->device()->close();
     emit messageReady(dataStorage);
     qDebug() << "sentData";
 }
 
 void SerialiZer::processReturnData(QSharedPointer<QByteArray> arr)
 {
-   QTextStream input(arr.get());
-   input.setAutoDetectUnicode(false);
-   quint16 packageId;
+
+    QDataStream input(arr.get(), QIODevice::ReadWrite);
+    input.setVersion(QDataStream::Qt_5_15);
+
+   unsigned char packageId;
    input >> packageId;
 
    //NEED to decomment line below in prod
@@ -59,17 +64,18 @@ void SerialiZer::processReturnData(QSharedPointer<QByteArray> arr)
    emit resultsAccepted(arr);
 }
 
-void SerialiZer::processFormula(QTextStream & input)
+void SerialiZer::processFormula(AbstractOutput * input)
 {
     QSharedPointer<QByteArray> dataStorage (new QByteArray());
-    input.device()->reset();
+    input->device()->reset();
     if (m_workMode == SerialMode::SEND_CHAR) {
-        QTextStream stream(dataStorage.get(),QIODevice::ReadWrite);
+//        QTextStream stream(dataStorage.get(),QIODevice::ReadWrite);
+        QDataStream stream(dataStorage.get(),QIODevice::ReadWrite);
+        stream.setVersion(QDataStream::Qt_5_15);
         stream << START;
-        while (!input.atEnd()) { // выглядит как оверкилл, но количество строк считаем и кастим к байт арррею
-            stream  << PADDING;
+        while (!input->atEnd()) { // выглядит как оверкилл, но количество строк считаем и кастим к байт арррею
             QString line;
-            input >> line;
+            *input >> line;
             if (line.contains(QString("+"))) {
                 stream << ADD;
             } else if (line.contains(QString("-"))) {
@@ -89,19 +95,13 @@ void SerialiZer::processFormula(QTextStream & input)
             } else if (line.contains(QString("X"))) {
                 stream << ARR;
             } else if (!line.isEmpty()){
-                stream << REG << PADDING;
-                stream << (line);
+                stream << REG;
+                stream << (line.toDouble());
             }
 
         }
         stream << END;
-        stream.flush();
-        input.device()->close();
     }
-    QByteArray packInfo;
-    QTextStream stream2(packInfo, QIODevice::ReadWrite);
-    stream2 << FORMULA << PADDING;
-    stream2.flush();
     emit messageReady(dataStorage);
     qDebug() << "sentFormula";
 }

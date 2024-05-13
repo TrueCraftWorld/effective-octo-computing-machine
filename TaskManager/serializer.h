@@ -2,9 +2,10 @@
 #define SERIALIZER_H
 
 #include <QObject>
-#include <QTextStream>
+#include <QDataStream>
 #include <QSharedPointer>
 #include "constants.h"
+#include "abstractoutput.h"
 
 enum class SerialMode {
     SEND_CHAR,
@@ -22,8 +23,8 @@ class SerialiZer : public QObject
     Q_OBJECT
 public:
     explicit SerialiZer(QObject *parent = nullptr);
-    void processFormula(QTextStream&);
-    void processDataInput(QTextStream&);
+    void processFormula(AbstractOutput*);
+    void processDataInput(AbstractOutput*);
     void processReturnData(QSharedPointer<QByteArray>);
 
 signals:

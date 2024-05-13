@@ -54,7 +54,7 @@ void TaskManager::initialize(StartParams &param)
 
     QObject::connect(&m_serialiser, &SerialiZer::messageReady, this,
                      [this](QSharedPointer<QByteArray> msg) {
-        m_tcp_side.SendMessageToNode(m_targetNode.soc, msg);
+        m_tcp_side.SendMessageToNode(m_targetNode.soc, *msg);
     });
     QObject::connect(&m_tcp_side, &Server::signalSocketConnected, this,
                      [this](QTcpSocket* socketForConnect, QHostAddress ip4, quint16 port)
@@ -100,20 +100,19 @@ void TaskManager::initialize(StartParams &param)
 
     if (param.inputFilePath.isEmpty()) {
         m_inputStream = (new ConsoleInput(ConsoleActions::DataIn));
-//        m_inputStreamsetCodec("Windows-1251");
     } else {
         m_inputStream = (new FileInput(param.inputFilePath));
     }
 
 
     if (param.outputFilePath.isEmpty()) {
-        m_outputStream = new ConsoleInput(ConsoleActions::DataOut); //
+        m_outputStream = static_cast<AbstractOutput*>(new ConsoleInput(ConsoleActions::DataOut)); //
     } else {
-        m_outputStream = new FileInput(QString("results.txt")); //
+        m_outputStream = static_cast<AbstractOutput*>(new FileInput(QString("results.txt"))); //
     }
 
 
-    m_serialiser.processDataInput(*m_inputStream);
-    m_serialiser.processFormula(*m_formulaStream);
+    m_serialiser.processDataInput(m_inputStream);
+    m_serialiser.processFormula(m_formulaStream);
 }
 

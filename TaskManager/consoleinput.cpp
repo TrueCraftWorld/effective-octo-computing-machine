@@ -1,43 +1,55 @@
 #include "consoleinput.h"
 #include "constants.h"
 #include <iostream>
-#include <QTextStream>
+//#include <QTextStream>
 #include <QBuffer>
 #include <QSharedPointer>
+#include <QPointer>
 
 
 ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
+//    : m_buf(new QByteArray())
 {
-    setDevice(&m_buf);
+    setVersion(QDataStream::Qt_5_15);
+    QPointer<QBuffer> dynamicBuff (new QBuffer(&m_ba));
+    setDevice(dynamicBuff);
     device()->open(QIODevice::ReadWrite);
-    int dataCount = 0;
+    quint64 dataCount = 0;
+    QByteArray tmpBA;
+    QDataStream tmpStream(&tmpBA, QIODevice::ReadWrite);
+    tmpStream.setVersion(QDataStream::Qt_5_15);
+    double tmp = 0;
     switch (actionType) {
     case ConsoleActions::DataIn:
 
         std::cout << "Enter numbers to process, divided by enter. Enter \"quit\" to stop entering" << "\r\n";
-        *this << PADDING;
+//        *this << PADDING;
+
         while (1) {
+
             std::string line;
             std::getline(std::cin, line);
             if (line == "quit") {
                 std::cout << "quit!" << std::endl;
-                flush();
+//                flush();
+//                tmpStream.setDevice(nullptr);
+                *this << dataCount << tmpBA;
                 break;
             } else {
                 bool isOk = false;
-
-                double tmp = QString::fromStdString(line).toDouble(&isOk);
+                tmp = QString::fromStdString(line).toDouble(&isOk);
                 if (isOk) {
                     ++dataCount;
                     std::cout << "data accepted" << std::endl;
-                    *this << tmp << PADDING;
+//                    *this << tmp << PADDING;
+                    tmpStream << tmp;
                 } else {
                     std::cout << "smth wrong, data dropped" << std::endl;
     //                break;
                 }
             }
         }
-        m_buf.buffer().prepend(QString("%1").arg(dataCount).toLatin1());
+
         break;
     case ConsoleActions::DataOut:
         break;
@@ -49,11 +61,12 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
             std::getline(std::cin, line);
             if (line == "quit") {
                 std::cout << "quit!" << std::endl;
-                flush();
+//                flush();
                 break;
             } else if (!QString::fromStdString(line).contains(' ')) {
                 std::cout << "data accepted" << std::endl;
-                *this << QString::fromStdString(line) << PADDING;
+//                *this << QString::fromStdString(line) << PADDING;
+                *this << QString::fromStdString(line);
             } else {
                 std::cout << "smth wrong, data dropped" << std::endl;
             }
@@ -67,11 +80,12 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
             std::getline(std::cin, line);
             if (line == "quit") {
                 std::cout << "quit!" << std::endl;
-                flush();
+//                flush();
                 break;
             } else if (!QString::fromStdString(line).contains(' ')){
                 std::cout << "data accepted" << std::endl;
-                *this << QString::fromStdString(line) << PADDING;
+//                *this << QString::fromStdString(line) << PADDING;
+                *this << QString::fromStdString(line);
                 break;
             }
         }
@@ -84,11 +98,12 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
             std::getline(std::cin, line);
             if (line == "quit") {
                 std::cout << "quit!" << std::endl;
-                flush();
+//                flush();
                 break;
             } else if (!QString::fromStdString(line).contains(' ')) {
                 std::cout << "data accepted" << std::endl;
-                *this << QString::fromStdString(line) << PADDING;
+//                *this << QString::fromStdString(line) << PADDING;
+                *this << QString::fromStdString(line);
                 break;
             }
         }
@@ -100,7 +115,7 @@ void ConsoleInput::dataOutput(QSharedPointer<QByteArray> inp)
 {
     QString tmp;
     *this << *inp;
-    flush();
+//    flush();
     device()->reset();
 
     while (!atEnd()){

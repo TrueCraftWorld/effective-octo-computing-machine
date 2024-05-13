@@ -1,182 +1,209 @@
 #include "tcpserver.h"
 #include <QStack>
 #include <QFile>
-
-//#include <fstream>
+#include <fstream>
+#include <QTextStream>
+#include <QDataStream>
 #include <cmath>
 
 constexpr quint16 KEY_PROGRAM = 132;
 
-constexpr quint16 PKG_DATAINFO = 0xA0;
-constexpr quint16 PKG_DATAPREP = 0xB0;
-constexpr quint16 PKG_FORMULA = 0xC0;
-constexpr quint16 PKG_DATAARRAY = 0xD0;
-constexpr quint16 PKG_DATAMODIFIED = 0xE0;
-constexpr quint16 PKG_CONNECTIONCHECK = 0xF0;
-
-constexpr char PADDING = '\n';
+constexpr unsigned char PKG_DATAINFO = 0xA0;
+constexpr unsigned char PKG_DATAPREP = 0xB0;
+constexpr unsigned char PKG_FORMULA = 0xC0;
+constexpr unsigned char PKG_DATAARRAY = 0xD0;
+constexpr unsigned char PKG_DATAMODIFIED = 0xE0;
+constexpr unsigned char PKG_CONNECTIONCHECK = 0xF0;
 
 Server::Server(quint16 port)
 {
-	m_isAwaitingAdditionalData = false;
-	if (this->listen(QHostAddress::Any, port))
-	{
-		qDebug() << "start tcp server" << this->serverPort();
-	}
-	else
-	{
-		this->listen(QHostAddress::Any, 0);
-		qDebug() << "port" << port << "busy, new port" << this->serverPort();
-	}
+    m_isAwaitingAdditionalData = false;
+    if (this->listen(QHostAddress::Any, port))
+    {
+        qDebug() << "start tcp server" << this->serverPort();
+    }
+    else
+    {
+        this->listen(QHostAddress::Any, 0);
+        qDebug() << "port" << port << "busy, new port" << this->serverPort();
+    }
 }
 
-void Server::SendMessageToNode(QTcpSocket* socket, QSharedPointer<QByteArray> msg)
+void Server::SendMessageToNode(QTcpSocket* socket, QByteArray& msg)
 {
-    if (socket == nullptr) return;
     QByteArray temp_msg;
     temp_msg.clear();
 
-    temp_msg.push_back("132");
-    temp_msg.push_back(PADDING);
-    temp_msg.push_back(QString("%1").arg(msg->size()).toLatin1());
-    temp_msg.push_back(PADDING);
-    temp_msg.push_back(*msg);
+    QDataStream msgStream(temp_msg);
 
+    msgStream << quint16(KEY_PROGRAM) << quint64(msg.size()) << msg;
 
-    socket->write(temp_msg);
+    if (socket != nullptr)
+    {
+        socket->write(temp_msg);
+    }
 }
 
 void Server::slotReadyRead()
 {
-    qDebug() << "recieve";
     m_tempSocket = (QTcpSocket*)sender();
-    quint32 bytesArrived = m_tempSocket->bytesAvailable();
-    quint16 keyProgram = 0;
-    QTextStream streamIn(m_tempSocket);
-    if (m_isAwaitingAdditionalData) {
-        //WHAT TO DO if there is start of new message in the end of
-        //branch of continious accepting
-    } else if (bytesArrived < 10) {
+    QDataStream streamIn(m_tempSocket);
+    streamIn.setVersion(QDataStream::Qt_5_15);
+    //QTextStream streamIn(m_tempSocket);
+
+    qint64 bytesAvailable = m_tempSocket->bytesAvailable();
+
+    // If not all the data came in at once, expect an additional packet
+    if (m_isAwaitingAdditionalData)
+    {
+        ReadDataFromTcp(&streamIn, bytesAvailable);
+        if (m_waitedBytes == 0)
+        {
+            emit signalSendDataToSerializer(m_dataStorage);
+            m_isAwaitingAdditionalData = false;
+        }
         return;
-    } else {
-
-        streamIn >> keyProgram;
-        if (keyProgram != KEY_PROGRAM)
-            return;
-//        }
-//        else {
-            streamIn >> m_waitedBytes;
-            qint64 diff =  (bytesArrived - (3 + QString("%1").arg(m_waitedBytes).size()));
-            while (diff > 0) {
-                QSharedPointer<QByteArray> tmp (new QByteArray());
-                tmp->append(streamIn.read(m_waitedBytes).toLatin1());
-                emit signalSendDataToSerializer(tmp);
-                streamIn >> keyProgram;
-                if (keyProgram != KEY_PROGRAM)
-                    return;
-                  streamIn >> m_waitedBytes;
-            }
-            if (diff < 0) { //accept less then needed
-//                m_isAwaitingAdditionalData = true;
-//                m_dataStorage = (new QByteArray());
-//                streamIn >> *m_dataStorage;
-//                m_waitedBytes -= abs(diff);
-//                return; //
-
-                //DEMO: should be working but there is a problem above so commented out
-            } else if (diff == 0) {
-                //            emit signalSendDataToSerializer(QSharedPointer<QByteArray>(m_dataStorage));
-                //            m_dataStorage = nullptr;
-                QSharedPointer<QByteArray> tmp (new QByteArray());
-                streamIn >> *tmp;
-                emit signalSendDataToSerializer(tmp);
-            }
     }
 
+    while (bytesAvailable > 10)
+    {
+        quint16 keyProgram;
+        streamIn >> keyProgram;
 
-//    QTextStream streamIn(m_tempSocket);
-//	unsigned char op;
-//    QSharedPointer<QByteArray> tmp (new QByteArray(streamIn.device()->readAll()));
-//    *tmp = (QByteArray(streamIn.device()->readAll()));
-//    signalSendDataToSerializer(tmp);
-//
-//    qDebug() << (*tmp);
-//	m_tempSocket = (QTcpSocket*)sender();
-//	QDataStream streamIn(m_tempSocket);
-//	unsigned char op;
+        // Check if it is our programm package
+        if (keyProgram != KEY_PROGRAM)
+        {
+            qDebug() << "WARNING: ERROR IN PACKAGE READING";
+            return;
+        }
+        else
+        {
+            m_dataStorage = QSharedPointer<QByteArray>(new QByteArray());
 
-//	// If not all the data came in at once, expect an additional packet
-//    if (m_isAwaitingAdditionalData) {
-//		ReadDataFromTcp();
-//        if (m_waitedBytes == 0) {
-//            emit signalSendDataToSerializer(QSharedPointer<QByteArray>(m_dataStorage));
-//            m_dataStorage = nullptr;
-//			m_isAwaitingAdditionalData = false;
-//		}
-//		return;
-//    } else if (m_tempSocket->bytesAvailable() < 10) {
-//		return;
-//	}
+            streamIn >> m_waitedBytes;
+            m_dataStorage->resize(m_waitedBytes);
 
-//	quint16 keyProgram;
-//	streamIn >> keyProgram;
+            // At first reading m_waitedBytes == 0 only if it is connectionCheck
+            if (m_waitedBytes == 0)
+                return;
 
-//	// Check if it is our programm package
-//    if (keyProgram != KEY_PROGRAM) {
-//		return;
-//    } else  {
-//		streamIn >> m_waitedBytes;
+            ReadDataFromTcp(&streamIn, bytesAvailable);
 
-//		// At first reading m_waitedBytes == 0 only if it is connectionCheck
-//		if (m_waitedBytes == 0)
-//			return;
+            if (m_waitedBytes != 0)
+            {
+                m_isAwaitingAdditionalData = true;
+            }
+            else
+            {
+                emit signalSendDataToSerializer(m_dataStorage);
+            }
+        }
+    }
 
-//		ReadDataFromTcp();
-		
-//        if (m_waitedBytes != 0) {
-//			m_isAwaitingAdditionalData = true;
-//        } else {
-//            emit signalSendDataToSerializer(QSharedPointer<QByteArray>(m_dataStorage));
-//            m_dataStorage = nullptr;
-//		}
-//	}
 }
 
-void Server::ReadDataFromTcp() 
+void Server::ReadDataFromTcp(QDataStream *stream, qint64& bytesAvailable)
 {
-    if (m_dataStorage == nullptr) m_dataStorage = new QByteArray();
-    quint64 minForRead = qMin<>(m_waitedBytes, quint64(m_tempSocket->bytesAvailable()));
-    m_dataStorage->append(m_tempSocket->read(minForRead)); // BUG, TODO: Change m_tempSocket to QDataStream
-	m_waitedBytes -= minForRead;
+    quint64 minForRead = qMin<>(m_waitedBytes, quint64(bytesAvailable));
+    stream->readRawData(m_dataStorage->data(), minForRead);
+    m_waitedBytes -= minForRead;
+    bytesAvailable -= minForRead + sizeof(quint16) + sizeof(quint64);
 }
 
 
 void Server::slotConnectSocket(QHostAddress ip4, quint16 port)
 {
-	m_tempSocket = new QTcpSocket(this);
-	m_tempSocket->connectToHost(ip4, port);
-	InitializeSocket(m_tempSocket);
-	emit signalSocketConnected(m_tempSocket, ip4, port);
-	qDebug() << "Connecting tcp to: " << ip4 << ' ' << port;
+    m_tempSocket = new QTcpSocket(this);
+    m_tempSocket->connectToHost(ip4, port);
+    InitializeSocket(m_tempSocket);
+    emit signalSocketConnected(m_tempSocket, ip4, port);
+    qDebug() << "Connecting tcp to: " << ip4 << ' ' << port;
 }
-
 
 void Server::incomingConnection(qintptr socketDescriptor)
 {
-	m_tempSocket = new QTcpSocket(this);
-	m_tempSocket->setSocketDescriptor(socketDescriptor);
-	InitializeSocket(m_tempSocket);
-	emit signalSocketConnected(m_tempSocket, m_tempSocket->peerAddress(), m_tempSocket->peerPort());
-	qDebug() << "TCP, client connected: " << socketDescriptor;
+    m_tempSocket = new QTcpSocket(this);
+    m_tempSocket->setSocketDescriptor(socketDescriptor);
+    InitializeSocket(m_tempSocket);
+    emit signalSocketConnected(m_tempSocket, m_tempSocket->peerAddress(), m_tempSocket->peerPort());
+    qDebug() << "TCP, client connected: " << socketDescriptor;
 }
 
 void Server::InitializeSocket(QTcpSocket* socket)
 {
-	connect(socket, &QTcpSocket::readyRead, this, &Server::slotReadyRead);
-	connect(socket, &QTcpSocket::disconnected,
-		[this, socket]
-		{
-			qDebug() << "TCP, disconnected: " << socket->socketDescriptor();
-			emit signalSocketDisconnected(socket);
-		});
+    connect(socket, &QTcpSocket::readyRead, this, &Server::slotReadyRead);
+    connect(socket, &QTcpSocket::disconnected,
+        [this, socket]
+        {
+            qDebug() << "TCP, disconnected: " << socket->socketDescriptor();
+            emit signalSocketDisconnected(socket);
+        });
 }
+
+/*void Server::slotReadyRead()
+{
+    QString messageDebug = "132\n14\n11\n11\n22\n22\n33";
+    m_tempSocket = (QTcpSocket*)sender();
+    QTextStream streamIn(&messageDebug);
+    //QTextStream streamIn(m_tempSocket);
+    streamIn.setAutoDetectUnicode(false);
+    unsigned char op;
+
+    const qint64 bytesAvailable = m_tempSocket->bytesAvailable();
+
+    // If not all the data came in at once, expect an additional packet
+    if (m_isAwaitingAdditionalData)
+    {
+        ReadDataFromTcp(&streamIn, bytesAvailable);
+        if (m_waitedBytes == 0)
+        {
+            emit signalSendDataToSerializer(m_dataStorage);
+            m_isAwaitingAdditionalData = false;
+        }
+        return;
+    }
+    else if (bytesAvailable < 10)
+    {
+        return;
+    }
+
+    QString tempString;
+    streamIn >> tempString;
+    quint16 keyProgram = tempString.toInt();
+
+    // Check if it is our programm package
+    if (keyProgram != KEY_PROGRAM)
+    {
+        return;
+    }
+    else
+    {
+        m_dataStorage = QSharedPointer<QByteArray>(new QByteArray());
+
+        streamIn >> m_waitedBytes;
+
+        // At first reading m_waitedBytes == 0 only if it is connectionCheck
+        if (m_waitedBytes == 0)
+            return;
+
+        streamIn.readLine();
+        ReadDataFromTcp(&streamIn, bytesAvailable);
+
+        if (m_waitedBytes != 0)
+        {
+            m_isAwaitingAdditionalData = true;
+        }
+        else
+        {
+            emit signalSendDataToSerializer(m_dataStorage);
+        }
+    }
+}
+
+void Server::ReadDataFromTcp(QTextStream *stream, const qint64 bytesAvailable)
+{
+    quint64 minForRead = qMin<>(m_waitedBytes, quint64(bytesAvailable));
+    m_dataStorage.data()->append(stream->read(minForRead).toLatin1());
+    m_waitedBytes -= minForRead;
+}
+*/

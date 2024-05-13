@@ -3,15 +3,16 @@
 #include "abstractoutput.h"
 #include <QObject>
 #include <QFile>
-#include <QTextStream>
+//#include <QTextStream>
 
 class FileInput : public AbstractOutput
 {
 public:
     FileInput(QString filePath);
     ~FileInput();
-    void dataOutput(QSharedPointer<QByteArray>) override;
+    void dataOutput(QSharedPointer<QByteArray>) override final;
 signals:
+    QByteArray m_ba;
     QFile *m_file;
 };
 

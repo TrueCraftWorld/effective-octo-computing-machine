@@ -29,7 +29,7 @@ Server::Server(quint16 port)
 	}
 }
 
-void Server::SendMessageToNode(QTcpSocket* socket, const QByteArray& msg)
+void SendMessageToNode(QTcpSocket* socket, QByteArray& msg)
 {
 	QByteArray temp_msg;
 	temp_msg.clear();
@@ -48,7 +48,8 @@ void Server::slotReadyRead()
 {
 	m_tempSocket = (QTcpSocket*)sender();
 	QDataStream streamIn(m_tempSocket);
-	unsigned char op;
+	streamIn.setVersion(QDataStream::Qt_5_15);
+	//QTextStream streamIn(m_tempSocket);
 
 	const qint64 bytesAvailable = m_tempSocket->bytesAvailable();
 
@@ -81,13 +82,14 @@ void Server::slotReadyRead()
 		m_dataStorage = QSharedPointer<QByteArray>(new QByteArray());
 
 		streamIn >> m_waitedBytes;
+		m_dataStorage->resize(m_waitedBytes);
 
 		// At first reading m_waitedBytes == 0 only if it is connectionCheck
 		if (m_waitedBytes == 0)
 			return;
 
 		ReadDataFromTcp(&streamIn, bytesAvailable);
-		
+
 		if (m_waitedBytes != 0)
 		{
 			m_isAwaitingAdditionalData = true;
@@ -135,3 +137,71 @@ void Server::InitializeSocket(QTcpSocket* socket)
 			emit signalSocketDisconnected(socket);
 		});
 }
+
+/*void Server::slotReadyRead()
+{
+	QString messageDebug = "132\n14\n11\n11\n22\n22\n33";
+	m_tempSocket = (QTcpSocket*)sender();
+	QTextStream streamIn(&messageDebug);
+	//QTextStream streamIn(m_tempSocket);
+	streamIn.setAutoDetectUnicode(false);
+	unsigned char op;
+
+	const qint64 bytesAvailable = m_tempSocket->bytesAvailable();
+
+	// If not all the data came in at once, expect an additional packet
+	if (m_isAwaitingAdditionalData)
+	{
+		ReadDataFromTcp(&streamIn, bytesAvailable);
+		if (m_waitedBytes == 0)
+		{
+			emit signalSendDataToSerializer(m_dataStorage);
+			m_isAwaitingAdditionalData = false;
+		}
+		return;
+	}
+	else if (bytesAvailable < 10)
+	{
+		return;
+	}
+
+	QString tempString;
+	streamIn >> tempString;
+	quint16 keyProgram = tempString.toInt();
+
+	// Check if it is our programm package
+	if (keyProgram != KEY_PROGRAM)
+	{
+		return;
+	}
+	else 
+	{
+		m_dataStorage = QSharedPointer<QByteArray>(new QByteArray());
+
+		streamIn >> m_waitedBytes;
+
+		// At first reading m_waitedBytes == 0 only if it is connectionCheck
+		if (m_waitedBytes == 0)
+			return;
+
+		streamIn.readLine();
+		ReadDataFromTcp(&streamIn, bytesAvailable);
+		
+		if (m_waitedBytes != 0)
+		{
+			m_isAwaitingAdditionalData = true;
+		}
+		else
+		{
+			emit signalSendDataToSerializer(m_dataStorage);
+		}
+	}
+}
+
+void Server::ReadDataFromTcp(QTextStream *stream, const qint64 bytesAvailable)
+{
+	quint64 minForRead = qMin<>(m_waitedBytes, quint64(bytesAvailable));
+	m_dataStorage.data()->append(stream->read(minForRead).toLatin1());
+	m_waitedBytes -= minForRead;
+}
+*/

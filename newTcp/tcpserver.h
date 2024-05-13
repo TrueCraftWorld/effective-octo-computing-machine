@@ -13,7 +13,7 @@ class Server : public QTcpServer
 	Q_OBJECT
 public:
 	Server(quint16 port = 0);
-	void SendMessageToNode(QTcpSocket* socket, const QByteArray& msg);
+	void SendMessageToNode(QTcpSocket* socket, QByteArray& msg);
 
 private:
 	QTcpSocket* m_tempSocket;

@@ -7,9 +7,11 @@
 
 #include "node.h"
 #include "power_meter.h"
+#include "tcpserver.h"
+#include "nodeserializer.h"
 
 #include <QRandomGenerator>
-
+#include <QTimer>
 
 /**
  *   \brief   Конструктор
@@ -32,6 +34,25 @@ Node::Node(QObject *parent, const Options_command_line &options_command_line)
     m_discovery_service = new DiscoveryService(parent, options_command_line);
     m_discovery_service->setObjectName("dis");
     connect(m_discovery_service, &DiscoveryService::data_ready, this, &Node::node_data);
+
+    //Connection and disconnection of tcp-socket
+    connect(this, &Node::node_info_updated, &m_tcpServer, &TcpModule::slotConnectSocket);
+    connect(&m_tcpServer, &TcpModule::signalSocketDisconnected, this, &Node::slotTcpSocketDisonnected);
+    connect(&m_tcpServer, &TcpModule::signalSocketConnected, this, &Node::slotTcpSocketConnected);
+
+    // Init timer for TCP-socket life checker
+    m_timerCheckerExistedTcpConnections = new QTimer(this);
+    m_timerCheckerExistedTcpConnections->setInterval(TIME_CHECK_CONNECTION_MSEC);
+    m_timerCheckerExistedTcpConnections->start();
+    connect(m_timerCheckerExistedTcpConnections, &QTimer::timeout, this, &Node::slotCheckConnections);
+
+    // Connect tcp-module and serializer
+    connect(&m_tcpServer, &TcpModule::signalSendDataToSerializer, &m_serializer, &NodeSerializer::slotDeserializeMessage);
+    connect(&m_serializer, &NodeSerializer::signalDataInfo, [](quint64 amount) { qDebug() << "Catch DataInfo: " << amount; });
+    connect(&m_serializer, &NodeSerializer::signalDataPrep, [](quint64 amount) { qDebug() << "Catch DataPrep: " << amount; });
+    connect(&m_serializer, &NodeSerializer::signalFormula, []() { qDebug() << "Catch Formula"; });
+    connect(&m_serializer, &NodeSerializer::signalDataArray, []() { qDebug() << "Catch DataArray"; });
+    connect(&m_serializer, &NodeSerializer::signalDataModified, []() { qDebug() << "Catch DataModified"; });
 
     /* TODO: удалить, начало */
     // timer = new  QTimer(parent);
@@ -113,7 +134,7 @@ void Node::node_data(NodeData &node_data)
                 qDebug() << node_data.node_id.ip << ":" << node_data.node_id.port;
                 qDebug() << node_data.priority;
 
-                emit node_info_updated();
+                emit node_info_updated(node_data.node_id);
             }
         }
         else
@@ -122,7 +143,7 @@ void Node::node_data(NodeData &node_data)
             qDebug() << node_data.node_id.ip << ":" << node_data.node_id.port;
             qDebug() << node_data.priority;
 
-            emit node_info_updated();
+            emit node_info_updated(node_data.node_id);
         }
     }
 }
@@ -179,4 +200,35 @@ void Node::connect_client(quint64 amount_processed_data)
     m_data_storage_processing = new DataStorageProcessing(this, is_selected_node, m_node_info, amount_processed_data);
     // m_data_storage_processing = new DataStorageProcessing(this, true, m_node_info, amount_processed_data);  /// TODO: заглушка, замениьт на строку выше, а эту удалить
     m_data_storage_processing->setObjectName("dst");
+}
+
+void Node::slotCheckConnections()
+{
+    for (const auto& info : m_node_info.neighbour_nodes)
+    {
+        m_tcpServer.SendMessageToNode(info.socket, "");
+    }
+}
+
+void Node::slotTcpSocketDisonnected(QTcpSocket* socket)
+{
+    m_node_info.neighbour_nodes.erase(
+        std::remove_if(
+            m_node_info.neighbour_nodes.begin(),
+            m_node_info.neighbour_nodes.end(),
+            [socket](const NodeData& data) { return data.node_id.ip == socket->peerAddress() && data.node_id.port == socket->peerPort(); }),
+        m_node_info.neighbour_nodes.end());
+    socket->deleteLater();
+}
+
+void Node::slotTcpSocketConnected(QTcpSocket* socket, QHostAddress ip4, quint16 port)
+{
+    for (auto& info : m_node_info.neighbour_nodes)
+    {
+        if (info.node_id.ip == ip4 && info.node_id.port == port)
+        {
+            info.socket = socket;
+            break;
+        }
+    }
 }

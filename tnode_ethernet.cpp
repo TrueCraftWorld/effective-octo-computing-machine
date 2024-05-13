@@ -32,7 +32,7 @@ TNode_Ethernet::TNode_Ethernet(QObject *parent, const Options_command_line &opti
     udp_socket_receive = new QUdpSocket(this);
     udp_socket_receive->setObjectName("udp_socket_receive");
 
-    if (udp_socket_receive->bind(QHostAddress::AnyIPv4, multicast_port, QUdpSocket::ShareAddress))
+    if (udp_socket_receive->bind(QHostAddress::AnyIPv4, multicast_port, QUdpSocket::ShareAddress | QUdpSocket::ReuseAddressHint))
     {
         if (udp_socket_receive->joinMulticastGroup(multicast_address))
         {
@@ -84,6 +84,7 @@ void TNode_Ethernet::find_host_ip(void)
         {
             host_ip_address = address;
             qDebug() << host_ip_address.toString();
+            break;
         }
     }
 }

@@ -2,6 +2,7 @@
 #include <QDebug>
 #include "mocknode.h"
 #include <iostream>
+#include "nodeserializer.h"
 
 int main(int argc, char* argv[])
 {
@@ -10,9 +11,7 @@ int main(int argc, char* argv[])
     // udp network instance
     // add QT += network to your project file
     //NodeUdpManager net(nullptr, 1010);
-    quint16 q;
-    std::cin >> q;
-    MockNode node(q);
+    MockNode node(45578);
 
 
 

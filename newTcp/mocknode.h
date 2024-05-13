@@ -1,5 +1,6 @@
 #pragma once
 #include "tcpserver.h"
+#include "nodeserializer.h"
 
 constexpr quint32 TIME_CHECK_CONNECTION_MSEC = 5000;
 
@@ -38,5 +39,6 @@ public slots:
 private:
 	NodeInfo m_nodeInfo;
 	Server m_tcpServer;
+	NodeSerializer m_serializer;
 	QTimer* m_timerCheckerExistedTcpConnections;
 };

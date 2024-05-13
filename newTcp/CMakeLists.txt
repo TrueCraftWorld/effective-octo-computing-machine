@@ -1,3 +1,3 @@
 cmake_minimum_required (VERSION 3.8)
 
-add_executable(${PROJECT_NAME} main.cpp "tcpserver.cpp" mocknode.cpp)
+add_executable(${PROJECT_NAME} main.cpp "tcpserver.cpp" mocknode.cpp "nodeserializer.cpp" "nodeserializer.h")

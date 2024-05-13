@@ -2,15 +2,25 @@
 
 MockNode::MockNode(quint16 port) : m_tcpServer(port)
 {
+	// Connection and disconnection of tcp-socket
 	connect(this, &MockNode::signalNeighbourListUpdated, &m_tcpServer, &Server::slotConnectSocket);
 	connect(&m_tcpServer, &Server::signalSocketDisconnected, this, &MockNode::slotTcpSocketDisonnected);
 	connect(&m_tcpServer, &Server::signalSocketConnected, this, &MockNode::slotTcpSocketConnected);
 
+	// TCP-socket life checker
 	m_timerCheckerExistedTcpConnections = new QTimer(this);
 	m_timerCheckerExistedTcpConnections->setInterval(TIME_CHECK_CONNECTION_MSEC);
 	m_timerCheckerExistedTcpConnections->start();
 
 	connect(m_timerCheckerExistedTcpConnections, &QTimer::timeout, this, &MockNode::slotCheckConnections);
+
+	// Connect tcp-module and serializer
+	connect(&m_tcpServer, &Server::signalSendDataToSerializer, &m_serializer, &NodeSerializer::slotDeserializeMessage);
+	connect(&m_serializer, &NodeSerializer::signalDataInfo, [](quint64 amount) { qDebug() << "Catch DataInfo: " << amount; });
+	connect(&m_serializer, &NodeSerializer::signalDataPrep, [](quint64 amount) { qDebug() << "Catch DataPrep: " << amount; });
+	connect(&m_serializer, &NodeSerializer::signalFormula, []() { qDebug() << "Catch Formula"; });
+	connect(&m_serializer, &NodeSerializer::signalDataArray, []() { qDebug() << "Catch DataArray"; });
+	connect(&m_serializer, &NodeSerializer::signalDataModified, []() { qDebug() << "Catch DataModified"; });
 }
 
 void MockNode::SetNewConnection(const NodeData& data)

@@ -9,6 +9,7 @@
 #define NODE_INFO_H
 
 #include <QHostAddress>
+#include <QTcpSocket>
 
 
 /// Значения по умолчанию для UDP Socket
@@ -43,6 +44,7 @@ typedef struct
     double mips;  /// вычислительная мощность
     quint32 priority;  /// приоритет
     NodeID node_id;  /// IP и порт узла
+    QTcpSocket* socket; /// TCP сокет
     bool compression;
 } NodeData;
 

@@ -11,6 +11,7 @@
 #include <QCoreApplication>
 #include <QCommandLineParser>
 #include <QCommandLineOption>
+#include <QTextCodec>
 
 
 static void parser_cmd_line(const QStringList &arg, Options_command_line &options_command_line);

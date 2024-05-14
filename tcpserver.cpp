@@ -86,10 +86,6 @@ void TcpModule::slotReadyRead()
 
 			ReadDataFromTcp(&streamIn, bytesAvailable);
 
-			// At first reading m_waitedBytes == 0 only if it is connectionCheck
-			if (m_waitedBytes == 0)
-				continue;
-
 			if (m_waitedBytes != 0)
 			{
 				m_isAwaitingAdditionalData = true;

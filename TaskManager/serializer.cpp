@@ -36,11 +36,9 @@ void SerialiZer::processDataInput(AbstractOutput * input)
     stream << DATA_IN;
 
     while (!input->atEnd()) {
-
         double line = 0;
         *input >> line;
         stream << line;
-        std::cout << line << std::endl;
     }
 
 //    stream.flush();

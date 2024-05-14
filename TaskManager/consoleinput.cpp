@@ -23,7 +23,7 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
     case ConsoleActions::DataIn:
 
         std::cout << "Enter numbers to process, divided by enter. Enter \"quit\" to stop entering" << "\r\n";
-//        *this << PADDING;
+
 
         while (1) {
 
@@ -31,8 +31,7 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
             std::getline(std::cin, line);
             if (line == "quit") {
                 std::cout << "quit!" << std::endl;
-//                flush();
-//                tmpStream.setDevice(nullptr);
+
                 *this << dataCount << tmpBA;
                 break;
             } else {
@@ -41,7 +40,6 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
                 if (isOk) {
                     ++dataCount;
                     std::cout << "data accepted" << std::endl;
-//                    *this << tmp << PADDING;
                     tmpStream << tmp;
                 } else {
                     std::cout << "smth wrong, data dropped" << std::endl;
@@ -61,11 +59,10 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
             std::getline(std::cin, line);
             if (line == "quit") {
                 std::cout << "quit!" << std::endl;
-//                flush();
                 break;
             } else if (!QString::fromStdString(line).contains(' ')) {
                 std::cout << "data accepted" << std::endl;
-//                *this << QString::fromStdString(line) << PADDING;
+
                 *this << QString::fromStdString(line);
             } else {
                 std::cout << "smth wrong, data dropped" << std::endl;
@@ -80,11 +77,9 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
             std::getline(std::cin, line);
             if (line == "quit") {
                 std::cout << "quit!" << std::endl;
-//                flush();
                 break;
             } else if (!QString::fromStdString(line).contains(' ')){
                 std::cout << "data accepted" << std::endl;
-//                *this << QString::fromStdString(line) << PADDING;
                 *this << QString::fromStdString(line);
                 break;
             }
@@ -98,11 +93,9 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
             std::getline(std::cin, line);
             if (line == "quit") {
                 std::cout << "quit!" << std::endl;
-//                flush();
                 break;
             } else if (!QString::fromStdString(line).contains(' ')) {
                 std::cout << "data accepted" << std::endl;
-//                *this << QString::fromStdString(line) << PADDING;
                 *this << QString::fromStdString(line);
                 break;
             }
@@ -115,7 +108,6 @@ void ConsoleInput::dataOutput(QSharedPointer<QByteArray> inp)
 {
     QString tmp;
     *this << *inp;
-//    flush();
     device()->reset();
 
     while (!atEnd()){

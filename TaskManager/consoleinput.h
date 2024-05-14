@@ -15,7 +15,6 @@ public:
     void dataOutput(QSharedPointer<QByteArray>) override final;
 
 private:
-//    QBuffer m_buf;
     QByteArray m_ba;
 
 };

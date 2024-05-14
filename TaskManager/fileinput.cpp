@@ -17,13 +17,18 @@ FileInput::FileInput(QString filePath)
         if (m_file->open(QIODevice::ReadOnly)) {
             m_file->seek(0);
             QString fileDescript = m_file->readLine();
-            if (!fileDescript.contains("formula")) *this << fileDescript.toLongLong();
+            bool isFormula = fileDescript.contains("formula");
+            if (!isFormula) *this << fileDescript.toLongLong();
             while (!m_file->atEnd()) {
                 QString tmp = m_file->readLine();
                 bool isOk = false;
                 double tmpDouble = tmp.toDouble(&isOk);
                 if (isOk) {
-                    *this << tmpDouble;
+                    if (isFormula) {
+                        if (tmp.contains('C')) { *this << tmp;}
+                    } else {
+                        *this << tmpDouble;
+                    }
                 } else {
                     *this << tmp;
                 }
@@ -43,10 +48,8 @@ FileInput::~FileInput()
 void FileInput::dataOutput(QSharedPointer<QByteArray> inp)
 {
     m_file->close();
-//    reset();
+
     if (m_file->open(QIODevice::ReadWrite)) {
-//        m_file->seek(0);
-//        setDevice(m_file);
         QDataStream tmp(inp.get(), QIODevice::ReadWrite);
         while (!tmp.atEnd()) {
             double val;
@@ -54,6 +57,5 @@ void FileInput::dataOutput(QSharedPointer<QByteArray> inp)
             m_file->write(QString("%1\n").arg(val).toLatin1());
         }
         m_file->close();
-//        flush();
     }
 }

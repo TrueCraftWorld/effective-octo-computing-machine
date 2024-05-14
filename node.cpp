@@ -131,7 +131,7 @@ void Node::node_data(NodeData &node_data)
 {
     bool present = false;
 
-    if (get_priority() < node_data.priority)
+    if (get_priority() > node_data.priority)
     {
         if (!m_node_info.neighbour_nodes.empty())
         {

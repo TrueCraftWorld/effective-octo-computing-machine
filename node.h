@@ -26,19 +26,23 @@ public:
                   const Options_command_line &options_command_line);
     ~Node();
     quint32 get_priority() const;
+    double get_mips() const;
     ModeNode get_mode_node();
     NodeInfo &get_node_info();
 
 signals:
     void node_info_updated(NodeID id);  /// список с данными узлов обновился
     void transmit_data_node(QByteArray& data);  /// отправка данных по udp
+    void signalSendTcpInfo(double tempMips, quint32 tempPriority, quint16 tempPort);
 
 public slots:
     void node_data(NodeData &node_data);  /// данные соседнего узла
-    void connect_client(quint64 np_data);  /// подключился клиент
+    void connect_client(QTcpSocket* socket, quint64 amount_processed_data);  /// подключился клиент
     // void connect_client();  /// TODO: заглушка заменить на строку выше, эту строку удалить
     void slotTcpSocketConnected(QTcpSocket*, QHostAddress ip4, quint16 port);
     void slotTcpSocketDisonnected(QTcpSocket*);
+    void slotUpdateTcpInfo(double mips, quint32 priority, quint16 port, QTcpSocket* socket);
+    void slotSendTcpInfo(QTcpSocket* socket);
     void slotCheckConnections();
     void timeout_timer_1hz(QObject* parent);  /// функция вызывается по таймеру раз в секунду
 

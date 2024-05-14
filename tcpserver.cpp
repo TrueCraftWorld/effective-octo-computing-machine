@@ -60,7 +60,7 @@ void TcpModule::slotReadyRead()
 		ReadDataFromTcp(&streamIn, bytesAvailable);
 		if (m_waitedBytes == 0)
 		{
-			emit signalSendDataToSerializer(m_dataStorage);
+			emit signalSendDataToSerializer(m_tempSocket, m_dataStorage);
 			m_isAwaitingAdditionalData = false;
 		}
 		return;
@@ -86,17 +86,13 @@ void TcpModule::slotReadyRead()
 
 			ReadDataFromTcp(&streamIn, bytesAvailable);
 
-			// At first reading m_waitedBytes == 0 only if it is connectionCheck
-			if (m_waitedBytes == 0)
-				continue;
-
 			if (m_waitedBytes != 0)
 			{
 				m_isAwaitingAdditionalData = true;
 			}
 			else
 			{
-				emit signalSendDataToSerializer(m_dataStorage);
+				emit signalSendDataToSerializer(m_tempSocket, m_dataStorage);
 			}
 		}
 	}
@@ -116,8 +112,10 @@ void TcpModule::slotConnectSocket(NodeID node_id)
 {
 	m_tempSocket = new QTcpSocket(this);
 	m_tempSocket->connectToHost(node_id.ip, node_id.port);
+	qDebug() << m_tempSocket->peerPort() << m_tempSocket->localPort();
 	InitializeSocket(m_tempSocket);
 	emit signalSocketConnected(m_tempSocket, node_id.ip, node_id.port);
+	emit signalNodeDataTcp(m_tempSocket);
 	qDebug() << "Connecting tcp to: " << node_id.ip << ' ' << node_id.port;
 }
 

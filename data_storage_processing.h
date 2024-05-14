@@ -30,7 +30,7 @@ signals:
     QVector<double> &get_data_worker();
 
 public slots:
-    void fill_data(QSharedPointer<QVector<double>> data);
+    void fill_data(QTcpSocket* socket, QSharedPointer<QVector<double>> dataPtr);
     void set_formula(QSharedPointer<QByteArray> ptr_formula);
     QByteArray &get_formula();
 

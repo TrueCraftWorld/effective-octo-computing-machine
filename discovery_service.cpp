@@ -56,6 +56,7 @@ void DiscoveryService::receive_data_node(QByteArray& data)
     stream >> sizeOfDatagram;
     stream >> node_data.node_id.port;
     stream >> node_data.priority;
+    stream >> node_data.mips;
 
     // qDebug() << node_data.ip.toString();
     // qDebug() << node_data.port;

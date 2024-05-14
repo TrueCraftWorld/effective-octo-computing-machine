@@ -28,7 +28,7 @@ public:
 signals:
 
 public slots:
-    void fill_data(QSharedPointer<QVector<double>> dataPtr);
+    void fill_data(QTcpSocket* socket, QSharedPointer<QVector<double>> dataPtr);
     QVector<QPair<QString, QVector<double>>> &get_data_tasker();
     QVector<double> &get_data_worker();
 

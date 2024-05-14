@@ -56,7 +56,7 @@ Node::Node(QObject *parent, const Options_command_line &options_command_line)
     // Connect tcp-module and serializer
     connect(&m_tcpServer, &TcpModule::signalSendDataToSerializer, &m_serializer, &NodeSerializer::slotDeserializeMessage);
     connect(&m_serializer, &NodeSerializer::signalDataInfo, this, &Node::connect_client);
-    connect(&m_serializer, &NodeSerializer::signalDataPrep, [](quint64 amount) { qDebug() << "Catch DataPrep: " << amount; });
+    connect(&m_serializer, &NodeSerializer::signalDataPrep, [](QTcpSocket* socket, quint64 amount) { qDebug() << "Catch DataPrep: " << amount; });
     connect(&m_serializer, &NodeSerializer::signalFormula, []() { qDebug() << "Catch Formula"; });
     connect(&m_serializer, &NodeSerializer::signalDataModified, []() { qDebug() << "Catch DataModified"; });
 
@@ -206,7 +206,7 @@ NodeInfo &Node::get_node_info()
  *   \param   amount_processed_data - количество обрабатываемых данных
  *   \retval  Нет
  */
-void Node::connect_client(quint64 amount_processed_data)
+void Node::connect_client(QTcpSocket* socket, quint64 amount_processed_data)
 // void Node::connect_client()
 {
     // quint64 amount_processed_data = 1000000;  /// TODO: заглушка количества обрабатываемых данных, удалить

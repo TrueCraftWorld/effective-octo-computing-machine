@@ -20,17 +20,21 @@ class NodeSerializer : public QObject
 {
 	Q_OBJECT
 public slots:
+
 	void slotDeserializeMessage(QTcpSocket* socket, QSharedPointer<QByteArray> ptrMsg);
-	void slotSerializeDataPrep();
-	void slotSerializeDataModified();
-	void slotSerializeNodeDataTcp(double tempMips, quint32 tempPriority, quint16 tempPort);
+	void slotSerializeDataPrep(QString selectedNode, quint64 dataWaiting); // Принимает DataPrep от изранного узла к нам
+	void slotSerializeFormula(QString selectedNode, QByteArray); // Принимает Formula от изранного узла к нам
+	void slotSerializeDataPrep(QString selectedNode, QVector<double> data); // Принимает DataArray от изранного узла к нам
+	void slotSerializeDataModified(QString simpleNode, quint64 dataWaiting); // Принимает DataModified от обычного узла к нам
+	void slotSerializeNodeDataTcp(double tempMips, quint32 tempPriority, quint16 tempPort); // Принимает информацию об узле по TCP
 signals:
+	// Сигналы для приёма извне
 	void signalNodeDataTcp(double tempMips, quint32 tempPriority, quint16 tempPort, QTcpSocket* tempSocket);
-	void signalDataInfo(quint64 dataAmount);
-	void signalDataPrep(quint64 dataWaiting);
-	void signalFormula(QSharedPointer<QByteArray> ptrFormula);
-	void signalDataArray(QSharedPointer<QVector<double>> values);
-	void signalDataModified(QTcpSocket* socket, QSharedPointer<QVector<double>> values);
+	void signalDataInfo(QTcpSocket* socketClient, quint64 dataAmount);
+	void signalDataPrep(QTcpSocket* socketSelectedNode, quint64 dataWaiting);
+	void signalFormula(QTcpSocket* socketSelectedNode, QSharedPointer<QByteArray> ptrFormula);
+	void signalDataArray(QTcpSocket* socketSelectedNode, QSharedPointer<QVector<double>> values);
+	void signalDataModified(QTcpSocket* socketSimpleNode, QSharedPointer<QVector<double>> values);
 private:
 
 };

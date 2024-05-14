@@ -148,7 +148,7 @@ void DataStorageProcessing::init_worker()
  *   \param   data - данные для обработки
  *   \retval  Нет
  */
-void DataStorageProcessing::fill_data(QSharedPointer<QVector<double>> dataPtr)
+void DataStorageProcessing::fill_data(QTcpSocket* socket, QSharedPointer<QVector<double>> dataPtr)
 {
     QVector<double>& data = *dataPtr;
     if (amount_processed_data >= (amount_data_process + data.size()))

@@ -37,7 +37,7 @@ signals:
 
 public slots:
     void node_data(NodeData &node_data);  /// данные соседнего узла
-    void connect_client(quint64 np_data);  /// подключился клиент
+    void connect_client(QTcpSocket* socket, quint64 amount_processed_data);  /// подключился клиент
     // void connect_client();  /// TODO: заглушка заменить на строку выше, эту строку удалить
     void slotTcpSocketConnected(QTcpSocket*, QHostAddress ip4, quint16 port);
     void slotTcpSocketDisonnected(QTcpSocket*);

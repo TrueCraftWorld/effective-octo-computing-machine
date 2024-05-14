@@ -30,14 +30,14 @@ TcpModule::TcpModule(quint16 port)
 	}
 }
 
-void TcpModule::SendMessageToNode(QTcpSocket* socket, const QByteArray& msg)
+void TcpModule::SendMessageToNode(QTcpSocket* socket, QByteArray& msg)
 {
 	QByteArray temp_msg;
 	temp_msg.clear();
 
-	QDataStream msgStream(temp_msg);
+	QDataStream msgStream(&temp_msg, QIODevice::WriteOnly);
 
-	msgStream << quint16(KEY_PROGRAM) << quint64(msg.size()) << msg;
+	msgStream << quint16(KEY_PROGRAM) << msg ;
 
 	if (socket != nullptr)
 	{
@@ -52,7 +52,7 @@ void TcpModule::slotReadyRead()
 	streamIn.setVersion(QDataStream::Qt_5_15);
 	//QTextStream streamIn(m_tempSocket);
 
-	const qint64 bytesAvailable = m_tempSocket->bytesAvailable();
+	qint32 bytesAvailable = m_tempSocket->bytesAvailable();
 
 	// If not all the data came in at once, expect an additional packet
 	if (m_isAwaitingAdditionalData)
@@ -65,48 +65,50 @@ void TcpModule::slotReadyRead()
 		}
 		return;
 	}
-	else if (bytesAvailable < 10)
+
+	while (bytesAvailable >= 6)
 	{
-		return;
-	}
+		quint16 keyProgram;
+		streamIn >> keyProgram;
 
-	quint16 keyProgram;
-	streamIn >> keyProgram;
-
-	// Check if it is our programm package
-	if (keyProgram != KEY_PROGRAM)
-	{
-		return;
-	}
-	else 
-	{
-		m_dataStorage = QSharedPointer<QByteArray>(new QByteArray());
-
-		streamIn >> m_waitedBytes;
-		m_dataStorage->resize(m_waitedBytes);
-
-		// At first reading m_waitedBytes == 0 only if it is connectionCheck
-		if (m_waitedBytes == 0)
-			return;
-
-		ReadDataFromTcp(&streamIn, bytesAvailable);
-
-		if (m_waitedBytes != 0)
+		// Check if it is our programm package
+		if (keyProgram != KEY_PROGRAM)
 		{
-			m_isAwaitingAdditionalData = true;
+			qDebug() << "WARNING: ERROR IN PACKAGE READING";
+			return;
 		}
 		else
 		{
-			emit signalSendDataToSerializer(m_dataStorage);
+			m_dataStorage = QSharedPointer<QByteArray>(new QByteArray());
+
+			streamIn >> m_waitedBytes;
+			m_dataStorage->resize(m_waitedBytes);
+
+			ReadDataFromTcp(&streamIn, bytesAvailable);
+
+			// At first reading m_waitedBytes == 0 only if it is connectionCheck
+			if (m_waitedBytes == 0)
+				continue;
+
+			if (m_waitedBytes != 0)
+			{
+				m_isAwaitingAdditionalData = true;
+			}
+			else
+			{
+				emit signalSendDataToSerializer(m_dataStorage);
+			}
 		}
 	}
+
 }
 
-void TcpModule::ReadDataFromTcp(QDataStream *stream, const qint64 bytesAvailable)
+void TcpModule::ReadDataFromTcp(QDataStream* stream, qint32& bytesAvailable)
 {
-	quint64 minForRead = qMin<>(m_waitedBytes, quint64(bytesAvailable));
+	quint64 minForRead = qMin<>(m_waitedBytes, quint32(bytesAvailable));
 	stream->readRawData(m_dataStorage->data(), minForRead);
 	m_waitedBytes -= minForRead;
+	bytesAvailable -= minForRead + sizeof(quint16) + sizeof(quint32);
 }
 
 

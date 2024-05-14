@@ -131,8 +131,7 @@ void Node::node_data(NodeData &node_data)
 {
     bool present = false;
 
-
-    if (get_priority() != node_data.priority)
+    if (get_priority() < node_data.priority)
     {
         if (!m_node_info.neighbour_nodes.empty())
         {
@@ -223,9 +222,11 @@ void Node::connect_client(quint64 amount_processed_data)
 
 void Node::slotCheckConnections()
 {
+    QByteArray emptyArray;
+    emptyArray.reserve(0);
     for (const auto& info : m_node_info.neighbour_nodes)
     {
-        m_tcpServer.SendMessageToNode(info.socket, "");
+        m_tcpServer.SendMessageToNode(info.socket, emptyArray);
     }
 }
 
@@ -242,13 +243,19 @@ void Node::slotTcpSocketDisonnected(QTcpSocket* socket)
 
 void Node::slotTcpSocketConnected(QTcpSocket* socket, QHostAddress ip4, quint16 port)
 {
+    bool findExistedNodeData = false;
     for (auto& info : m_node_info.neighbour_nodes)
     {
         if (info.node_id.ip == ip4 && info.node_id.port == port)
         {
             info.socket = socket;
+            findExistedNodeData = true;
             break;
         }
+    }
+    if (!findExistedNodeData)
+    {
+        m_node_info.neighbour_nodes.push_back({ 0,0, {QHostAddress(), 0}, socket, false});
     }
 }
 

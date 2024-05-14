@@ -7,22 +7,23 @@
 #include <QByteArray>
 #include <QTextStream>
 #include <QDataStream>
+#include "node_info.h"
 
-class Server : public QTcpServer
+class TcpModule : public QTcpServer
 {
     Q_OBJECT
 public:
-    Server(quint16 port = 0);
+    TcpModule(quint16 port = 0);
     void SendMessageToNode(QTcpSocket* socket, QByteArray& msg);
 
 private:
     QTcpSocket* m_tempSocket;
     QSharedPointer<QByteArray> m_dataStorage;
-    quint64 m_waitedBytes;
+    quint32 m_waitedBytes;
     bool m_isAwaitingAdditionalData;
 private:
     void InitializeSocket(QTcpSocket* socket);
-    void ReadDataFromTcp(QDataStream* stream, qint64& bytesAvailable);
+    void ReadDataFromTcp(QDataStream* stream, qint32& bytesAvailable);
 
 signals:
     void signalSendDataToSerializer(QSharedPointer<QByteArray> ptrMsg);
@@ -32,6 +33,6 @@ signals:
 public slots:
     void incomingConnection(qintptr socketDescriptor);
     void slotReadyRead();
-    void slotConnectSocket(QHostAddress ip4, quint16 port);
+    void slotConnectSocket(NodeID node_id);
     //void slotCheckTcpConnections();
 };

@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QBuffer>
 #include <QPointer>
-//#include <QTextStream>
+#include <iostream>
 
 FileInput::FileInput(QString filePath)
 {
@@ -54,6 +54,7 @@ void FileInput::dataOutput(QSharedPointer<QByteArray> inp)
         while (!tmp.atEnd()) {
             double val;
             tmp >> val;
+            std::cout << val << std::endl;
             m_file->write(QString("%1\n").arg(val).toLatin1());
         }
         m_file->close();

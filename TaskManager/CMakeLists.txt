@@ -44,6 +44,7 @@ add_executable(TaskManager
   fileinput.h
   abstractoutput.h
 
+  node_info.h
   constants.h
 )
 

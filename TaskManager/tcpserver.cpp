@@ -4,6 +4,7 @@
 #include <fstream>
 #include <QTextStream>
 #include <QDataStream>
+#include "node_info.h"
 #include <cmath>
 
 constexpr quint16 KEY_PROGRAM = 132;
@@ -15,7 +16,7 @@ constexpr unsigned char PKG_DATAARRAY = 0xD0;
 constexpr unsigned char PKG_DATAMODIFIED = 0xE0;
 constexpr unsigned char PKG_CONNECTIONCHECK = 0xF0;
 
-Server::Server(quint16 port)
+TcpModule::TcpModule(quint16 port)
 {
     m_isAwaitingAdditionalData = false;
     if (this->listen(QHostAddress::Any, port))
@@ -29,29 +30,29 @@ Server::Server(quint16 port)
     }
 }
 
-void Server::SendMessageToNode(QTcpSocket* socket, QByteArray& msg)
+void TcpModule::SendMessageToNode(QTcpSocket* socket, QByteArray& msg)
 {
     QByteArray temp_msg;
     temp_msg.clear();
 
-    QDataStream msgStream(temp_msg);
+    QDataStream msgStream(&temp_msg, QIODevice::WriteOnly);
 
-    msgStream << quint16(KEY_PROGRAM) << quint64(msg.size()) << msg;
+    msgStream << quint16(KEY_PROGRAM) << msg ;
 
-    if (socket != nullptr)
+    if (socket != nullptr && socket->isValid())
     {
         socket->write(temp_msg);
     }
 }
 
-void Server::slotReadyRead()
+void TcpModule::slotReadyRead()
 {
     m_tempSocket = (QTcpSocket*)sender();
     QDataStream streamIn(m_tempSocket);
     streamIn.setVersion(QDataStream::Qt_5_15);
     //QTextStream streamIn(m_tempSocket);
 
-    qint64 bytesAvailable = m_tempSocket->bytesAvailable();
+    qint32 bytesAvailable = m_tempSocket->bytesAvailable();
 
     // If not all the data came in at once, expect an additional packet
     if (m_isAwaitingAdditionalData)
@@ -65,7 +66,7 @@ void Server::slotReadyRead()
         return;
     }
 
-    while (bytesAvailable > 10)
+    while (bytesAvailable >= 6)
     {
         quint16 keyProgram;
         streamIn >> keyProgram;
@@ -83,11 +84,11 @@ void Server::slotReadyRead()
             streamIn >> m_waitedBytes;
             m_dataStorage->resize(m_waitedBytes);
 
-            // At first reading m_waitedBytes == 0 only if it is connectionCheck
-            if (m_waitedBytes == 0)
-                return;
-
             ReadDataFromTcp(&streamIn, bytesAvailable);
+
+            // At first reading m_waitedBytes == 0 only if it is connectionCheck
+//            if (m_waitedBytes == 0)
+//                continue;
 
             if (m_waitedBytes != 0)
             {
@@ -102,25 +103,25 @@ void Server::slotReadyRead()
 
 }
 
-void Server::ReadDataFromTcp(QDataStream *stream, qint64& bytesAvailable)
+void TcpModule::ReadDataFromTcp(QDataStream* stream, qint32& bytesAvailable)
 {
-    quint64 minForRead = qMin<>(m_waitedBytes, quint64(bytesAvailable));
+    quint64 minForRead = qMin<>(m_waitedBytes, quint32(bytesAvailable));
     stream->readRawData(m_dataStorage->data(), minForRead);
     m_waitedBytes -= minForRead;
-    bytesAvailable -= minForRead + sizeof(quint16) + sizeof(quint64);
+    bytesAvailable -= minForRead + sizeof(quint16) + sizeof(quint32);
 }
 
 
-void Server::slotConnectSocket(QHostAddress ip4, quint16 port)
+void TcpModule::slotConnectSocket(NodeID node_id)
 {
     m_tempSocket = new QTcpSocket(this);
-    m_tempSocket->connectToHost(ip4, port);
+    m_tempSocket->connectToHost(node_id.ip, node_id.port);
     InitializeSocket(m_tempSocket);
-    emit signalSocketConnected(m_tempSocket, ip4, port);
-    qDebug() << "Connecting tcp to: " << ip4 << ' ' << port;
+    emit signalSocketConnected(m_tempSocket, node_id.ip, node_id.port);
+    qDebug() << "Connecting tcp to: " << node_id.ip << ' ' << node_id.port;
 }
 
-void Server::incomingConnection(qintptr socketDescriptor)
+void TcpModule::incomingConnection(qintptr socketDescriptor)
 {
     m_tempSocket = new QTcpSocket(this);
     m_tempSocket->setSocketDescriptor(socketDescriptor);
@@ -129,9 +130,9 @@ void Server::incomingConnection(qintptr socketDescriptor)
     qDebug() << "TCP, client connected: " << socketDescriptor;
 }
 
-void Server::InitializeSocket(QTcpSocket* socket)
+void TcpModule::InitializeSocket(QTcpSocket* socket)
 {
-    connect(socket, &QTcpSocket::readyRead, this, &Server::slotReadyRead);
+    connect(socket, &QTcpSocket::readyRead, this, &TcpModule::slotReadyRead);
     connect(socket, &QTcpSocket::disconnected,
         [this, socket]
         {

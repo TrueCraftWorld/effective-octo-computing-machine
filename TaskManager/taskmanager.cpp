@@ -56,13 +56,14 @@ void TaskManager::initialize(StartParams &param)
                      [this](QSharedPointer<QByteArray> msg) {
         m_tcp_side.SendMessageToNode(m_targetNode.soc, *msg);
     });
-    QObject::connect(&m_tcp_side, &Server::signalSocketConnected, this,
+
+    QObject::connect(&m_tcp_side, &TcpModule::signalSocketConnected, this,
                      [this](QTcpSocket* socketForConnect, QHostAddress ip4, quint16 port)
     {
         this->m_targetNode.soc = socketForConnect;
     });
 
-    QObject::connect(&m_tcp_side, &Server::signalSendDataToSerializer, &m_serialiser,  &SerialiZer::processReturnData);
+    QObject::connect(&m_tcp_side, &TcpModule::signalSendDataToSerializer, &m_serialiser,  &SerialiZer::processReturnData);
 
     QObject::connect(&m_serialiser, &SerialiZer::resultsAccepted, this,
                      [this](QSharedPointer<QByteArray> msg) {
@@ -73,22 +74,21 @@ void TaskManager::initialize(StartParams &param)
         QString str;
         ConsoleInput consDial(ConsoleActions::TargetIP);
         consDial >> str;
-        m_targetNode.ip4Addr = QHostAddress(str);
+        m_targetNode.node.ip = QHostAddress(str);
     } else {
-        m_targetNode.ip4Addr = QHostAddress(param.targetIP);
+        m_targetNode.node.ip = QHostAddress(param.targetIP);
     }
 
     if (param.targetPort.isEmpty()) {
         QString str;
         ConsoleInput consDial_2(ConsoleActions::TargetPort);
         consDial_2 >> str;
-        m_targetNode.port = str.toInt();
+        m_targetNode.node.port = str.toInt();
     } else {
-        m_targetNode.port = (param.targetPort).toInt();
+        m_targetNode.node.port = (param.targetPort).toInt();
     }
 
-
-    m_tcp_side.slotConnectSocket(m_targetNode.ip4Addr, m_targetNode.port);
+    m_tcp_side.slotConnectSocket(m_targetNode.node);
 
     //idea is that we use text stram in bothcases - console input OR file reading
     //so we just initilizing those streams differently;
@@ -104,13 +104,11 @@ void TaskManager::initialize(StartParams &param)
         m_inputStream = (new FileInput(param.inputFilePath));
     }
 
-
     if (param.outputFilePath.isEmpty()) {
         m_outputStream = static_cast<AbstractOutput*>(new ConsoleInput(ConsoleActions::DataOut)); //
     } else {
         m_outputStream = static_cast<AbstractOutput*>(new FileInput(QString("results.txt"))); //
     }
-
 
     m_serialiser.processDataInput(m_inputStream);
     m_serialiser.processFormula(m_formulaStream);

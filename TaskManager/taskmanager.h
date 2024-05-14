@@ -7,6 +7,7 @@
 #include "fileinput.h"
 #include "consoleinput.h"
 #include "tcpserver.h"
+#include "node_info.h"
 #include <QCommandLineParser>
 #include <QSharedPointer>
 
@@ -19,8 +20,9 @@ struct StartParams {
 };
 
 struct TargetNode {
-    QHostAddress ip4Addr;
-    quint16 port;
+    NodeID node;
+//    QHostAddress ip4Addr;
+//    quint16 port;
     QTcpSocket* soc;
 };
 
@@ -39,7 +41,7 @@ signals:
 
 private:
     SerialiZer m_serialiser;
-    Server m_tcp_side;
+    TcpModule m_tcp_side;
     QCommandLineParser m_startParamParser;
     TargetNode m_targetNode;
 

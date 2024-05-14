@@ -29,12 +29,10 @@ signals:
     void data_ready(NodeData &node_data);  /// данные узла
 
 public slots:
-    void timeout_timer_1hz(QObject *parent);  /// функция вызывается по таймеру раз в секунду
     void receive_data_node(QByteArray &data);  /// приёма данных по udp
 
 private:
     TNode_Ethernet *eth = nullptr;
-    QTimer *timer_1hz = nullptr;
 };
 
 #endif // DISCOVERYSERVICE_H

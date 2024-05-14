@@ -24,6 +24,8 @@ add_executable(Node
   loger.h
   compute_core.h compute_core.cpp
   element.h element.cpp
+  nodeserializer.cpp
+  tcpserver.cpp
 )
 target_link_libraries(Node Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network)
 

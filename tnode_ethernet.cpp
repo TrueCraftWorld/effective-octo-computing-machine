@@ -97,11 +97,7 @@ void TNode_Ethernet::find_host_ip(void)
  */
 void TNode_Ethernet::transmit_datagram_multicast_mode(QByteArray &data)
 {
-    QRegularExpression exp("node");
-    QList<Node *> node = parent()->findChildren<Node *>(exp);
-
-
-    if (node.at(0)->get_mode_node() == ModeNode::MN_WAIT)
+    if (udp_socket_transmit != nullptr && udp_socket_transmit->isValid())
     {
         udp_socket_transmit->writeDatagram(data, multicast_address, multicast_port);
     }
@@ -128,12 +124,13 @@ void TNode_Ethernet::receive_datagram_multicast_mode(void)
             ba.clear();
 
             QDataStream stream(&ba, QIODevice::WriteOnly);
-
+            quint32 sizeOfDatagram;
 
             stream.setVersion(QDataStream::Qt_5_15);
             stream << n_datagram.senderAddress();
-            stream << (quint16) n_datagram.senderPort();
-            stream << n_datagram.data().toHex().toUInt(nullptr, 16);
+            //stream << (quint16) n_datagram.senderPort();
+            //stream << n_datagram.data().toHex().toUInt(nullptr, 16);
+            stream << n_datagram.data();
 
             emit  ethernet_data_ready(ba);
         }

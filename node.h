@@ -31,6 +31,7 @@ public:
 
 signals:
     void node_info_updated(NodeID id);  /// список с данными узлов обновился
+    void transmit_data_node(QByteArray& data);  /// отправка данных по udp
 
 public slots:
     void node_data(NodeData &node_data);  /// данные соседнего узла
@@ -39,12 +40,14 @@ public slots:
     void slotTcpSocketConnected(QTcpSocket*, QHostAddress ip4, quint16 port);
     void slotTcpSocketDisonnected(QTcpSocket*);
     void slotCheckConnections();
+    void timeout_timer_1hz(QObject* parent);  /// функция вызывается по таймеру раз в секунду
 
 private:
     NodeInfo m_node_info;
     DiscoveryService *m_discovery_service = nullptr;
     DataStorageProcessing *m_data_storage_processing = nullptr;
     QTimer* m_timerCheckerExistedTcpConnections;
+    QTimer* timer_1hz = nullptr;
     TcpModule m_tcpServer;
     NodeSerializer m_serializer;
     // QTimer *timer = nullptr;  /// TODO: для отладки, удалить

@@ -40,6 +40,9 @@ Node::Node(QObject *parent, const Options_command_line &options_command_line)
     connect(&m_tcpServer, &TcpModule::signalSocketDisconnected, this, &Node::slotTcpSocketDisonnected);
     connect(&m_tcpServer, &TcpModule::signalSocketConnected, this, &Node::slotTcpSocketConnected);
 
+    // Connect UDP transfer for node
+    connect(this, &Node::transmit_data_node, m_discovery_service, &DiscoveryService::transmit_data_node);
+
     // Init timer for TCP-socket life checker
     m_timerCheckerExistedTcpConnections = new QTimer(this);
     m_timerCheckerExistedTcpConnections->setInterval(TIME_CHECK_CONNECTION_MSEC);
@@ -53,6 +56,22 @@ Node::Node(QObject *parent, const Options_command_line &options_command_line)
     connect(&m_serializer, &NodeSerializer::signalFormula, []() { qDebug() << "Catch Formula"; });
     connect(&m_serializer, &NodeSerializer::signalDataArray, []() { qDebug() << "Catch DataArray"; });
     connect(&m_serializer, &NodeSerializer::signalDataModified, []() { qDebug() << "Catch DataModified"; });
+
+    timer_1hz = new  QTimer(parent);
+    timer_1hz->setObjectName("timer_1hz");
+    connect(timer_1hz, &QTimer::timeout, [=] { timeout_timer_1hz(parent); });
+
+    timeout_timer_1hz(parent);
+
+    if (!timer_1hz->isActive())
+    {
+        timer_1hz->start(1000);
+    }
+    else
+    {
+        timer_1hz->stop();
+        timer_1hz->start(1000);
+    }
 
     /* TODO: удалить, начало */
     // timer = new  QTimer(parent);
@@ -231,4 +250,21 @@ void Node::slotTcpSocketConnected(QTcpSocket* socket, QHostAddress ip4, quint16 
             break;
         }
     }
+}
+
+void Node::timeout_timer_1hz(QObject* parent)
+{
+    if (get_mode_node() != ModeNode::MN_WAIT)
+        return;
+
+    quint32 priority = get_priority();
+    QByteArray ba;
+    QDataStream stream(&ba, QIODevice::WriteOnly);
+
+
+    stream.setVersion(QDataStream::Qt_5_15);
+    stream << m_tcpServer.serverPort();
+    stream << priority;
+
+    emit transmit_data_node(ba);
 }

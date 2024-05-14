@@ -25,21 +25,6 @@ DiscoveryService::DiscoveryService(QObject *parent, const Options_command_line &
     connect(eth, &TNode_Ethernet::ethernet_data_ready, this, &DiscoveryService::receive_data_node);
     connect(this, &DiscoveryService::transmit_data_node, eth, &TNode_Ethernet::transmit_datagram_multicast_mode);
 
-    timer_1hz = new  QTimer(parent);
-    timer_1hz->setObjectName("timer_1hz");
-    connect(timer_1hz, &QTimer::timeout, [=] { timeout_timer_1hz(parent); });
-
-    timeout_timer_1hz(parent);
-
-    if (!timer_1hz->isActive())
-    {
-        timer_1hz->start(1000);
-    }
-    else
-    {
-        timer_1hz->stop();
-        timer_1hz->start(1000);
-    }
 }
 
 
@@ -50,39 +35,7 @@ DiscoveryService::DiscoveryService(QObject *parent, const Options_command_line &
  */
 DiscoveryService::~DiscoveryService()
 {
-    if (timer_1hz->isActive())
-    {
-        timer_1hz->stop();
-    }
-
-    timer_1hz->deleteLater();
     eth->deleteLater();
-}
-
-
-/**
- *   \brief   Обработчик сигнала от таймера, вызывается раз в секунду
- *   \param  *parent - указатель на родительский класс
- *   \retval  Нет
- */
-void DiscoveryService::timeout_timer_1hz(QObject *parent)
-{
-    QRegularExpression exp("node");
-    QList<Node *> node = parent->findChildren<Node *>(exp);
-
-
-    if (!node.isEmpty())
-    {
-        quint32 priority = node.at(0)->get_priority();
-        QByteArray ba;
-        QDataStream stream(&ba, QIODevice::WriteOnly);
-
-
-        stream.setVersion(QDataStream::Qt_5_15);
-        stream << priority;
-
-        emit transmit_data_node(ba);
-    }
 }
 
 
@@ -91,14 +44,16 @@ void DiscoveryService::timeout_timer_1hz(QObject *parent)
  *   \param   data - указатель на родительский класс
  *   \retval  Нет
  */
-void DiscoveryService::receive_data_node(QByteArray &data)
+void DiscoveryService::receive_data_node(QByteArray& data)
 {
     NodeData node_data;
+    quint32 sizeOfDatagram;
     QDataStream stream(&data, QIODevice::ReadOnly);
 
 
     stream.setVersion(QDataStream::Qt_5_15);
     stream >> node_data.node_id.ip;
+    stream >> sizeOfDatagram;
     stream >> node_data.node_id.port;
     stream >> node_data.priority;
 
@@ -108,3 +63,4 @@ void DiscoveryService::receive_data_node(QByteArray &data)
 
     emit data_ready(node_data);
 }
+

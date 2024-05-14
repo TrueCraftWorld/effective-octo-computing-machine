@@ -53,8 +53,6 @@ Node::Node(QObject *parent, const Options_command_line &options_command_line)
     connect(&m_tcpServer, &TcpModule::signalSendDataToSerializer, &m_serializer, &NodeSerializer::slotDeserializeMessage);
     connect(&m_serializer, &NodeSerializer::signalDataInfo, [](quint64 amount) { qDebug() << "Catch DataInfo: " << amount; });
     connect(&m_serializer, &NodeSerializer::signalDataPrep, [](quint64 amount) { qDebug() << "Catch DataPrep: " << amount; });
-    connect(&m_serializer, &NodeSerializer::signalFormula, []() { qDebug() << "Catch Formula"; });
-    connect(&m_serializer, &NodeSerializer::signalDataArray, []() { qDebug() << "Catch DataArray"; });
     connect(&m_serializer, &NodeSerializer::signalDataModified, []() { qDebug() << "Catch DataModified"; });
 
     timer_1hz = new  QTimer(parent);
@@ -131,7 +129,7 @@ void Node::node_data(NodeData &node_data)
 {
     bool present = false;
 
-    if (get_priority() < node_data.priority)
+    if (get_priority() != node_data.priority)
     {
         if (!m_node_info.neighbour_nodes.empty())
         {
@@ -218,6 +216,9 @@ void Node::connect_client(quint64 amount_processed_data)
     m_data_storage_processing = new DataStorageProcessing(this, is_selected_node, m_node_info, amount_processed_data);
     // m_data_storage_processing = new DataStorageProcessing(this, true, m_node_info, amount_processed_data);  /// TODO: заглушка, замениьт на строку выше, а эту удалить
     m_data_storage_processing->setObjectName("dst");
+    connect(&m_serializer, &NodeSerializer::signalFormula, m_data_storage_processing, &DataStorageProcessing::set_formula);
+    connect(&m_serializer, &NodeSerializer::signalDataArray, m_data_storage_processing, &DataStorageProcessing::fill_data);
+    connect(&m_serializer, &NodeSerializer::signalDataModified, m_data_storage_processing, &DataStorageProcessing::fill_data);
 }
 
 void Node::slotCheckConnections()

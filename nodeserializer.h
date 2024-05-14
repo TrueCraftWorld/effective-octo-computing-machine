@@ -25,8 +25,8 @@ signals:
 	void signalDataInfo(quint64 dataAmount);
 	void signalDataPrep(quint64 dataWaiting);
 	void signalFormula(QSharedPointer<QByteArray> ptrFormula);
-	void signalDataArray(QSharedPointer<QVector<double>> values);
-	void signalDataModified(QSharedPointer<QVector<double>> values);
+    void signalDataArray(QSharedPointer<QVector<double>> values);
+    void signalDataModified(QSharedPointer<QVector<double>> values);
 private:
 
 };

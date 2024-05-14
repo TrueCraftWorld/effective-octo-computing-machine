@@ -1,8 +1,8 @@
 
 /**
  *   \file     data_storage_processing.cpp
- *   \version  0.04
- *   \date     2024.05.12
+ *   \version  0.05
+ *   \date     2024.05.14
  */
 
 #include "data_storage_processing.h"
@@ -147,18 +147,18 @@ void DataStorageProcessing::init_worker()
  *   \param   data - данные для обработки
  *   \retval  Нет
  */
-void DataStorageProcessing::fill_data(QVector<double> &data)
+void DataStorageProcessing::fill_data(QSharedPointer<QVector<double>> data)
 {
-    if (amount_processed_data >= (amount_data_process + data.size()))
+    if (amount_processed_data >= (amount_data_process + data->size()))
     {
         if (!is_selected_node)
         {
-            data_worker.append(data);
+            data_worker.append(*data);
             amount_data_process += data_worker.size() - amount_data_process;
         }
         else
         {
-            quint32 amount_required_nodes = search_required_nodes(data.size());
+            quint32 amount_required_nodes = search_required_nodes(data->size());
 
             if (amount_data_process == 0)
             {
@@ -168,14 +168,14 @@ void DataStorageProcessing::fill_data(QVector<double> &data)
                 {
                     size_qvectors += amount_data_nodes[i];
 
-                    if (data.size() < size_qvectors)
+                    if (data->size() < size_qvectors)
                     {
-                        data_tasker[i].second = data.mid(amount_data_process, data.size() - amount_data_process);
-                        amount_data_process += data.size();
+                        data_tasker[i].second = data->mid(amount_data_process, data->size() - amount_data_process);
+                        amount_data_process += data->size();
                     }
                     else
                     {
-                        data_tasker[i].second = data.mid(amount_data_process, amount_data_nodes[i]);
+                        data_tasker[i].second = data->mid(amount_data_process, amount_data_nodes[i]);
                         amount_data_process += amount_data_nodes[i];
                     }
                 }
@@ -191,24 +191,24 @@ void DataStorageProcessing::fill_data(QVector<double> &data)
                 {
                     size_qvectors += amount_data_nodes[i];
 
-                    if (data.size() < size_qvectors - amount_data_process)
+                    if (data->size() < size_qvectors - amount_data_process)
                     {
                         data_tasker[i].second.clear();
                         data_tasker[i].second = buf;
-                        data_tasker[i].second += data.mid(0, data.size());
-                        amount_data_process += data.size();
+                        data_tasker[i].second += data->mid(0, data->size());
+                        amount_data_process += data->size();
                     }
                     else if (!buf.isEmpty())
                     {
                         data_tasker[i].second.clear();
                         data_tasker[i].second = buf;
-                        data_tasker[i].second += data.mid(0, amount_data_nodes[i] - amount_data_process);
+                        data_tasker[i].second += data->mid(0, amount_data_nodes[i] - amount_data_process);
                         amount_data_process += amount_data_nodes[i] - amount_data_process;
                         buf.clear();
                     }
                     else
                     {
-                        data_tasker[i].second = data.mid(amount_data_process - buf_size, amount_data_nodes[i]);
+                        data_tasker[i].second = data->mid(amount_data_process - buf_size, amount_data_nodes[i]);
                         amount_data_process += amount_data_nodes[i];
                     }
                 }
@@ -297,6 +297,28 @@ quint32 DataStorageProcessing::search_required_nodes(quint32 size)
     }
 
     return amont_required_nodes;
+}
+
+
+/**
+ *   \brief   Сохраняем формулу
+ *   \param   ptr_formula - формула
+ *   \retval  Нет
+ */
+void DataStorageProcessing::set_formula(QSharedPointer<QByteArray> ptr_formula)
+{
+    formula = ptr_formula->data();
+}
+
+
+/**
+ *   \brief   Возвращаем формулу
+ *   \param   Нет
+ *   \retval  Формула
+ */
+QByteArray &DataStorageProcessing::get_formula()
+{
+    return formula;
 }
 
 

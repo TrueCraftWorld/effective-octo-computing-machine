@@ -42,7 +42,7 @@ void NodeSerializer::slotDeserializeMessage(QSharedPointer<QByteArray> ptrMsg)
 			(*ptrList).push_back(temp);
 		}
 		emit signalDataArray(ptrList);
-
+        break;
 	case PKG_DATAMODIFIED:
 		while (!streamMsg.atEnd())
 		{
@@ -50,5 +50,6 @@ void NodeSerializer::slotDeserializeMessage(QSharedPointer<QByteArray> ptrMsg)
 			(*ptrList).push_back(temp);
 		}
 		emit signalDataModified(ptrList);
+        break;
 	}
 }

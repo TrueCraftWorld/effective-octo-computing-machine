@@ -44,7 +44,7 @@ void NodeSerializer::slotDeserializeMessage(QTcpSocket* socket, QSharedPointer<Q
 			(*ptrList).push_back(temp);
 		}
 		emit signalDataArray(socket, ptrList);
-
+        break;
 	case PKG_DATAMODIFIED:
 		while (!streamMsg.atEnd())
 		{

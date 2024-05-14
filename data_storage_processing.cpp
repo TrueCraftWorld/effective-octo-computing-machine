@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include <QRegularExpression>
+#include <QSharedPointer>
 
 
 static bool compare_pair(const QPair<QString, QVector<double>> &value1,
@@ -147,8 +148,9 @@ void DataStorageProcessing::init_worker()
  *   \param   data - данные для обработки
  *   \retval  Нет
  */
-void DataStorageProcessing::fill_data(QVector<double> &data)
+void DataStorageProcessing::fill_data(QSharedPointer<QVector<double>> dataPtr)
 {
+    QVector<double>& data = *dataPtr;
     if (amount_processed_data >= (amount_data_process + data.size()))
     {
         if (!is_selected_node)

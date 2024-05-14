@@ -39,6 +39,10 @@ Node::Node(QObject *parent, const Options_command_line &options_command_line)
     connect(this, &Node::node_info_updated, &m_tcpServer, &TcpModule::slotConnectSocket);
     connect(&m_tcpServer, &TcpModule::signalSocketDisconnected, this, &Node::slotTcpSocketDisonnected);
     connect(&m_tcpServer, &TcpModule::signalSocketConnected, this, &Node::slotTcpSocketConnected);
+    
+    //TCP Additional data packages
+    connect(&m_tcpServer, &TcpModule::signalNodeDataTcp, this, &Node::slotSendTcpInfo);
+    connect(&m_serializer, &NodeSerializer::signalNodeDataTcp, this, &Node::slotUpdateTcpInfo);
 
     // Connect UDP transfer for node
     connect(this, &Node::transmit_data_node, m_discovery_service, &DiscoveryService::transmit_data_node);
@@ -51,10 +55,9 @@ Node::Node(QObject *parent, const Options_command_line &options_command_line)
 
     // Connect tcp-module and serializer
     connect(&m_tcpServer, &TcpModule::signalSendDataToSerializer, &m_serializer, &NodeSerializer::slotDeserializeMessage);
-    connect(&m_serializer, &NodeSerializer::signalDataInfo, [](quint64 amount) { qDebug() << "Catch DataInfo: " << amount; });
+    connect(&m_serializer, &NodeSerializer::signalDataInfo, this, &Node::connect_client);
     connect(&m_serializer, &NodeSerializer::signalDataPrep, [](quint64 amount) { qDebug() << "Catch DataPrep: " << amount; });
     connect(&m_serializer, &NodeSerializer::signalFormula, []() { qDebug() << "Catch Formula"; });
-    connect(&m_serializer, &NodeSerializer::signalDataArray, []() { qDebug() << "Catch DataArray"; });
     connect(&m_serializer, &NodeSerializer::signalDataModified, []() { qDebug() << "Catch DataModified"; });
 
     timer_1hz = new  QTimer(parent);
@@ -119,6 +122,15 @@ Node::~Node()
 quint32 Node::get_priority() const
 {
     return m_node_info.priority;
+}
+/**
+*\brief   Функция возвращает результат скоростного бенчмарка
+* \param   Нет
+* \retval  Приоритет узла
+*/
+double Node::get_mips() const
+{
+    return m_node_info.mips;
 }
 
 
@@ -216,6 +228,7 @@ void Node::connect_client(quint64 amount_processed_data)
     }
 
     m_data_storage_processing = new DataStorageProcessing(this, is_selected_node, m_node_info, amount_processed_data);
+    connect(&m_serializer, &NodeSerializer::signalDataArray, m_data_storage_processing, &DataStorageProcessing::fill_data);
     // m_data_storage_processing = new DataStorageProcessing(this, true, m_node_info, amount_processed_data);  /// TODO: заглушка, замениьт на строку выше, а эту удалить
     m_data_storage_processing->setObjectName("dst");
 }
@@ -241,6 +254,31 @@ void Node::slotTcpSocketDisonnected(QTcpSocket* socket)
     socket->deleteLater();
 }
 
+void Node::slotUpdateTcpInfo(double mips, quint32 priority, quint16 port, QTcpSocket* socket)
+{
+    for (auto& info : m_node_info.neighbour_nodes)
+    {
+        if (socket == info.socket)
+        {
+            info.mips = mips;
+            info.priority = priority;
+            info.node_id.port = socket->peerPort();
+            info.node_id.ip = socket->peerAddress();
+            break;
+        }
+    }
+}
+
+void Node::slotSendTcpInfo(QTcpSocket* socket)
+{
+    QByteArray tempByte;
+    tempByte.resize(15);
+    QDataStream streamByte(&tempByte, QIODevice::WriteOnly);
+    streamByte.setVersion(QDataStream::Qt_5_15);
+    streamByte << PKG_NODEDATATCP << m_tcpServer.serverPort() << m_node_info.mips << m_node_info.priority;
+    m_tcpServer.SendMessageToNode(socket, tempByte);
+}
+
 void Node::slotTcpSocketConnected(QTcpSocket* socket, QHostAddress ip4, quint16 port)
 {
     bool findExistedNodeData = false;
@@ -255,7 +293,7 @@ void Node::slotTcpSocketConnected(QTcpSocket* socket, QHostAddress ip4, quint16 
     }
     if (!findExistedNodeData)
     {
-        m_node_info.neighbour_nodes.push_back({ 0,0, {QHostAddress(), 0}, socket, false});
+        m_node_info.neighbour_nodes.push_back({ 0,0, {ip4, 0}, socket, false});
     }
 }
 
@@ -265,6 +303,7 @@ void Node::timeout_timer_1hz(QObject* parent)
         return;
 
     quint32 priority = get_priority();
+    double mips = get_mips();
     QByteArray ba;
     QDataStream stream(&ba, QIODevice::WriteOnly);
 
@@ -272,6 +311,7 @@ void Node::timeout_timer_1hz(QObject* parent)
     stream.setVersion(QDataStream::Qt_5_15);
     stream << m_tcpServer.serverPort();
     stream << priority;
+    stream << mips;
 
     emit transmit_data_node(ba);
 }

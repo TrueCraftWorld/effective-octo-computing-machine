@@ -22,7 +22,7 @@ constexpr unsigned char END = 0x0B;
 constexpr unsigned char DATA_INFO =   0xA0;
 constexpr unsigned char DATA_IN =     0xD0;
 constexpr unsigned char DATA_OUT =    0xE0;
-constexpr unsigned char FORMULA =     0xCA;
+constexpr unsigned char FORMULA =     0xC0;
 
 constexpr quint16 KEY = 132;
 

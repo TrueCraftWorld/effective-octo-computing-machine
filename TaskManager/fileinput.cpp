@@ -23,19 +23,19 @@ FileInput::FileInput(QString filePath)
                 QString tmp = m_file->readLine();
                 bool isOk = false;
                 double tmpDouble = tmp.toDouble(&isOk);
-                if (isOk) {
-                    if (isFormula) {
-                        if (tmp.contains('C')) { *this << tmp;}
-                    } else {
-                        *this << tmpDouble;
-                    }
-                } else {
+                if (isFormula) {
                     *this << tmp;
+                } else {
+                    if (isOk) {
+                            *this << tmpDouble;
+                    } else {
+                        *this << tmp;
+                    }
                 }
             }
         }
         m_file->close();
-        device()->reset();
+//        device()->reset();
     }
 
 }

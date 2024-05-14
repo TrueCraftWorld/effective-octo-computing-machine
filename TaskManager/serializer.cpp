@@ -70,6 +70,7 @@ void SerialiZer::processFormula(AbstractOutput * input)
 //        QTextStream stream(dataStorage.get(),QIODevice::ReadWrite);
         QDataStream stream(dataStorage.get(),QIODevice::ReadWrite);
         stream.setVersion(QDataStream::Qt_5_15);
+        stream << FORMULA;
         stream << START;
         while (!input->atEnd()) { // выглядит как оверкилл, но количество строк считаем и кастим к байт арррею
             QString line;

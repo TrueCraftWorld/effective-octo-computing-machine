@@ -236,7 +236,7 @@ void Node::slotTcpSocketDisonnected(QTcpSocket* socket)
         std::remove_if(
             m_node_info.neighbour_nodes.begin(),
             m_node_info.neighbour_nodes.end(),
-            [socket](const NodeData& data) { return data.node_id.ip == socket->peerAddress() && data.node_id.port == socket->peerPort(); }),
+            [socket](const NodeData& data) { return data.socket == socket; }),
         m_node_info.neighbour_nodes.end());
     socket->deleteLater();
 }

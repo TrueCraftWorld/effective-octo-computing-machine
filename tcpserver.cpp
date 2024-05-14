@@ -39,7 +39,7 @@ void TcpModule::SendMessageToNode(QTcpSocket* socket, QByteArray& msg)
 
 	msgStream << quint16(KEY_PROGRAM) << msg ;
 
-	if (socket != nullptr)
+	if (socket != nullptr && socket->isValid())
 	{
 		socket->write(temp_msg);
 	}

@@ -114,9 +114,7 @@ void TNode_Ethernet::receive_datagram_multicast_mode(void)
     if (udp_socket_receive->hasPendingDatagrams())
     {
         QNetworkDatagram n_datagram = udp_socket_receive->receiveDatagram();
-
-
-        if (n_datagram.senderPort() != multicast_port)
+        if (n_datagram.senderPort() != udp_socket_transmit->localPort())
         {
             QByteArray ba;
 

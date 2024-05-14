@@ -30,7 +30,7 @@ signals:
 	void signalDataPrep(quint64 dataWaiting);
 	void signalFormula(QSharedPointer<QByteArray> ptrFormula);
 	void signalDataArray(QSharedPointer<QVector<double>> values);
-	void signalDataModified(QSharedPointer<QVector<double>> values);
+	void signalDataModified(QTcpSocket* socket, QSharedPointer<QVector<double>> values);
 private:
 
 };

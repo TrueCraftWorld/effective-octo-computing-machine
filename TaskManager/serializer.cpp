@@ -28,12 +28,12 @@ void SerialiZer::processDataInput(AbstractOutput * input)
     dataInfo->clear();
     QDataStream dataInfoStream(dataInfo.get(), QIODevice::ReadWrite);
     dataInfoStream.setVersion(QDataStream::Qt_5_15);
-    dataInfoStream << DATA_INFO << dataCount;
+    dataInfoStream << PKG_DATAINFO << dataCount;
 
 
     emit messageReady(dataInfo);
     qDebug() << "dataInfo";
-    stream << DATA_IN;
+    stream << PKG_DATAARRAY;
 
     while (!input->atEnd()) {
         double line = 0;
@@ -57,7 +57,7 @@ void SerialiZer::processReturnData(QSharedPointer<QByteArray> arr)
    input >> packageId;
 
    //NEED to decomment line below in prod
-   if (packageId != DATA_OUT) return;
+   if (packageId != PKG_DATAMODIFIED) return;
 
    emit resultsAccepted(arr);
 }
@@ -70,7 +70,7 @@ void SerialiZer::processFormula(AbstractOutput * input)
 //        QTextStream stream(dataStorage.get(),QIODevice::ReadWrite);
         QDataStream stream(dataStorage.get(),QIODevice::ReadWrite);
         stream.setVersion(QDataStream::Qt_5_15);
-        stream << FORMULA;
+        stream << PKG_FORMULA;
         stream << START;
         while (!input->atEnd()) { // выглядит как оверкилл, но количество строк считаем и кастим к байт арррею
             QString line;

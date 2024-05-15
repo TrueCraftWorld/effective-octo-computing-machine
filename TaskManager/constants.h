@@ -19,10 +19,10 @@ constexpr unsigned char CTAN = 0x09;
 constexpr unsigned char DIV = 0x0A;
 constexpr unsigned char END = 0x0B;
 
-constexpr unsigned char DATA_INFO =   0xA0;
-constexpr unsigned char DATA_IN =     0xD0;
-constexpr unsigned char DATA_OUT =    0xE0;
-constexpr unsigned char FORMULA =     0xC0;
+constexpr unsigned char PKG_DATAINFO =   0xA0;
+constexpr unsigned char PKG_DATAARRAY =     0xD0;
+constexpr unsigned char PKG_DATAMODIFIED =    0xE0;
+constexpr unsigned char PKG_FORMULA =     0xC0;
 
 constexpr quint16 KEY = 132;
 

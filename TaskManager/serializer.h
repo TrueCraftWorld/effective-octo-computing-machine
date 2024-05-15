@@ -15,7 +15,7 @@ enum class SerialMode {
 
 struct DataInfo {
     quint64 dataCount;
-    char packType = DATA_INFO;
+    char packType = PKG_DATAINFO;
 };
 
 class SerialiZer : public QObject

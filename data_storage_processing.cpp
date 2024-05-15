@@ -157,7 +157,7 @@ void DataStorageProcessing::fill_data(QTcpSocket* socket, QSharedPointer<QVector
         if (!is_selected_node)
         {
             data_worker.append(data);
-            amount_data_process += data_worker.size() - amount_data_process;
+            amount_data_process += data.size();
         }
         else
         {
@@ -262,7 +262,7 @@ void DataStorageProcessing::fill_modified_data(QTcpSocket* socket, QSharedPointe
         if (!is_selected_node)
         {
             data_worker.append(data);
-            amount_data_process += data_worker.size() - amount_data_process;
+            amount_data_process -= data.size();
         }
         else
         {

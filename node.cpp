@@ -208,6 +208,14 @@ NodeInfo &Node::get_node_info()
 void Node::connect_client(QTcpSocket* socket, quint64 amount_processed_data)
 // void Node::connect_client()
 {
+    // Удаляем клиента из "списка узлов"
+    m_node_info.neighbour_nodes.erase(
+        std::remove_if(
+            m_node_info.neighbour_nodes.begin(),
+            m_node_info.neighbour_nodes.end(),
+            [socket](const NodeData& data) { return data.socket == socket; }),
+        m_node_info.neighbour_nodes.end());
+
     // quint64 amount_processed_data = 1000000;  /// TODO: заглушка количества обрабатываемых данных, удалить
     qDebug() << "Количество узлов в вычислительном кластере" << m_node_info.neighbour_nodes.size() + 1;
     qDebug() << "Вычислительная мощьность текущего узла" << m_node_info.mips;

@@ -59,30 +59,3 @@ void NodeSerializer::slotDeserializeMessage(QTcpSocket* socket, QSharedPointer<Q
         break;
 	}
 }
-
-void NodeSerializer::slotSerializeDataPrep(QString selectedNode, quint64 dataWaiting)
-{
-}
-
-void NodeSerializer::slotSerializeFormula(QString selectedNode, QByteArray)
-{
-}
-
-void NodeSerializer::slotSerializeDataPrep(QString selectedNode, QVector<double> data)
-{
-}
-
-void NodeSerializer::slotSerializeDataModified(QString simpleNode, quint64 dataWaiting)
-{
-}
-
-void NodeSerializer::slotSerializeNodeDataTcp(double tempMips, quint32 tempPriority, quint16 tempPort)
-{
-}
-
-void NodeSerializer::ParseQStringToIpPort(const QString& str, QHostAddress& ip, quint16& port)
-{
-	QStringList list = str.split(':');
-	ip = QHostAddress(list.at(0));
-	port = list.at(1).toInt();
-}

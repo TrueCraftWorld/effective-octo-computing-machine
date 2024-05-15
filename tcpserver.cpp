@@ -33,6 +33,7 @@ TcpModule::TcpModule(quint16 port)
 void TcpModule::SendMessageToNode(QTcpSocket* socket, QByteArray& msg)
 {
 	QByteArray temp_msg;
+	temp_msg.resize(0);
 	temp_msg.clear();
 
 	QDataStream msgStream(&temp_msg, QIODevice::WriteOnly);

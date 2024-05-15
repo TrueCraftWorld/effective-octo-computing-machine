@@ -9,6 +9,7 @@
 #include "power_meter.h"
 #include "tcpserver.h"
 #include "nodeserializer.h"
+#include "compute_core.h"
 
 #include <QRandomGenerator>
 #include <QTimer>
@@ -44,6 +45,7 @@ Node::Node(QObject *parent, const Options_command_line &options_command_line)
     connect(&m_tcpServer, &TcpModule::signalNodeDataTcp, this, &Node::slotSendTcpInfo);
     connect(&m_serializer, &NodeSerializer::signalNodeDataTcp, this, &Node::slotUpdateTcpInfo);
 
+
     // Connect UDP transfer for node
     connect(this, &Node::transmit_data_node, m_discovery_service, &DiscoveryService::transmit_data_node);
 
@@ -56,7 +58,7 @@ Node::Node(QObject *parent, const Options_command_line &options_command_line)
     // Connect tcp-module and serializer
     connect(&m_tcpServer, &TcpModule::signalSendDataToSerializer, &m_serializer, &NodeSerializer::slotDeserializeMessage);
     connect(&m_serializer, &NodeSerializer::signalDataInfo, this, &Node::connect_client);
-    connect(&m_serializer, &NodeSerializer::signalDataPrep, [](QTcpSocket* socket, quint64 amount) { qDebug() << "Catch DataPrep: " << amount; });
+    connect(&m_serializer, &NodeSerializer::signalDataPrep, this, &Node::connect_node);
 
     timer_1hz = new  QTimer(parent);
     timer_1hz->setObjectName("timer_1hz");
@@ -205,10 +207,11 @@ NodeInfo &Node::get_node_info()
  *   \param   amount_processed_data - количество обрабатываемых данных
  *   \retval  Нет
  */
-void Node::connect_client(QTcpSocket* socket, quint64 amount_processed_data)
+void Node::connect_node(QTcpSocket* socket, quint64 amount_processed_data)
 // void Node::connect_client()
 {
     // Удаляем клиента из "списка узлов"
+    m_clientSocket = socket;
     m_node_info.neighbour_nodes.erase(
         std::remove_if(
             m_node_info.neighbour_nodes.begin(),
@@ -234,12 +237,62 @@ void Node::connect_client(QTcpSocket* socket, quint64 amount_processed_data)
         }
     }
 
-    m_data_storage_processing = new DataStorageProcessing(this, is_selected_node, m_node_info, amount_processed_data);
+    m_data_storage_processing = new DataStorageProcessing(this, false, m_node_info, amount_processed_data);
     // m_data_storage_processing = new DataStorageProcessing(this, true, m_node_info, amount_processed_data);  /// TODO: заглушка, замениьт на строку выше, а эту удалить
     m_data_storage_processing->setObjectName("dst");
     connect(&m_serializer, &NodeSerializer::signalDataArray, m_data_storage_processing, &DataStorageProcessing::fill_data);
     connect(&m_serializer, &NodeSerializer::signalFormula, m_data_storage_processing, &DataStorageProcessing::set_formula);
     connect(&m_serializer, &NodeSerializer::signalDataModified, m_data_storage_processing, &DataStorageProcessing::fill_data);
+    connect(m_data_storage_processing, &DataStorageProcessing::data_tasker_ready, this, &Node::slotSerializeDataArray);
+    connect(m_data_storage_processing, &DataStorageProcessing::data_worker_ready, m_data_storage_processing, &DataStorageProcessing::calculateData);
+    connect(this, &Node::node_calculated_own_part, m_data_storage_processing, &DataStorageProcessing::calculateData);
+
+    
+    connect(m_data_storage_processing, &DataStorageProcessing::modified_data_worker_ready, this, &Node::slotSerializeDataModified);
+    connect(m_data_storage_processing, &DataStorageProcessing::modified_data_tasker_ready, this, &Node::slotSendResultToClient);
+}
+
+void Node::connect_client(QTcpSocket* socket, quint64 amount_processed_data)
+// void Node::connect_client()
+{
+    // Удаляем клиента из "списка узлов"
+    m_clientSocket = socket;
+    m_node_info.neighbour_nodes.erase(
+        std::remove_if(
+            m_node_info.neighbour_nodes.begin(),
+            m_node_info.neighbour_nodes.end(),
+            [socket](const NodeData& data) { return data.socket == socket; }),
+        m_node_info.neighbour_nodes.end());
+
+    // quint64 amount_processed_data = 1000000;  /// TODO: заглушка количества обрабатываемых данных, удалить
+    qDebug() << "Количество узлов в вычислительном кластере" << m_node_info.neighbour_nodes.size() + 1;
+    qDebug() << "Вычислительная мощьность текущего узла" << m_node_info.mips;
+    if (!m_node_info.neighbour_nodes.empty())
+    {
+        qDebug() << "Вычислительные мощьности соседий";
+        std::list<NodeData>::iterator it;
+
+        for (it = m_node_info.neighbour_nodes.begin(); it != m_node_info.neighbour_nodes.end(); ++it)
+        {
+            // qDebug() << it->node_id.ip;
+            // qDebug() << it->node_id.port;
+            // qDebug() << it->priority;
+            // it->mips = QRandomGenerator::global()->bounded(1, 1000000);  /// TODO: заглушка вычилсительной мощности, удалить
+            // qDebug() << it->mips;
+        }
+    }
+
+    m_data_storage_processing = new DataStorageProcessing(this, true, m_node_info, amount_processed_data);
+    // m_data_storage_processing = new DataStorageProcessing(this, true, m_node_info, amount_processed_data);  /// TODO: заглушка, замениьт на строку выше, а эту удалить
+    m_data_storage_processing->setObjectName("dst");
+    connect(&m_serializer, &NodeSerializer::signalDataArray, m_data_storage_processing, &DataStorageProcessing::fill_data);
+    connect(&m_serializer, &NodeSerializer::signalFormula, m_data_storage_processing, &DataStorageProcessing::set_formula);
+    connect(&m_serializer, &NodeSerializer::signalDataModified, m_data_storage_processing, &DataStorageProcessing::fill_data);
+    connect(m_data_storage_processing, &DataStorageProcessing::data_tasker_ready, this, &Node::slotSerializeDataArray);
+    connect(this, &Node::node_calculated_own_part, m_data_storage_processing, &DataStorageProcessing::calculateData);
+
+
+    connect(m_data_storage_processing, &DataStorageProcessing::modified_data_tasker_ready, this, &Node::slotSendResultToClient);
 }
 
 void Node::slotCheckConnections()
@@ -323,4 +376,135 @@ void Node::timeout_timer_1hz(QObject* parent)
     stream << mips;
 
     emit transmit_data_node(ba);
+}
+
+void Node::slotSerializeDataPrep(QString selectedNode, quint64 dataWaiting)
+{
+    QHostAddress ip;
+    quint16 port;
+
+    ParseQStringToIpPort(selectedNode, ip, port);
+
+    QByteArray msg;
+    QDataStream stream(msg);
+    stream << dataWaiting;
+
+    for (const auto& info : m_node_info.neighbour_nodes)
+    {
+        if (info.node_id.ip == ip && info.node_id.port == port)
+        {
+            m_tcpServer.SendMessageToNode(info.socket, msg);
+        }
+    }
+}
+
+void Node::slotSerializeFormula(QString selectedNode, QByteArray formula)
+{
+    QHostAddress ip;
+    quint16 port;
+
+    ParseQStringToIpPort(selectedNode, ip, port);
+
+    for (const auto& info : m_node_info.neighbour_nodes)
+    {
+        if (info.node_id.ip == ip && info.node_id.port == port)
+        {
+            m_tcpServer.SendMessageToNode(info.socket, formula);
+        }
+    }
+}
+
+void Node::slotSerializeDataArray(QVector<QPair<QString, QVector<double>>>& data_tasker, QByteArray& formula)
+{
+    for (auto& [str, data] : data_tasker)
+    {
+        QHostAddress ip;
+        quint16 port;
+
+        ParseQStringToIpPort(str, ip, port);
+
+        if (ip == QHostAddress())
+        {
+            emit node_calculated_own_part(nullptr, data);
+        }
+        else
+        {
+            QTcpSocket* socket_send = nullptr;
+            for (const auto& info : m_node_info.neighbour_nodes)
+            {
+                if (info.node_id.ip == ip && info.node_id.port == port)
+                {
+                    socket_send = info.socket;
+                    break;
+                }
+            }
+
+            QByteArray msg1;
+            msg1.resize(0);
+            QDataStream stream1(&msg1, QIODevice::WriteOnly);
+            stream1.device()->reset();
+            stream1 << PKG_DATAPREP;
+            stream1 << data.size();
+
+            m_tcpServer.SendMessageToNode(socket_send, msg1);
+
+            QByteArray msg2;
+            msg2.resize(0);
+            QDataStream stream2(&msg2, QIODevice::WriteOnly);
+            stream2.device()->reset();
+            stream2 << PKG_FORMULA;
+
+            m_tcpServer.SendMessageToNode(socket_send, msg2);
+
+            QByteArray msg3;
+            msg3.resize(0);
+            QDataStream stream3(&msg3, QIODevice::WriteOnly);
+            stream3.device()->reset();
+            stream3 << PKG_DATAARRAY;
+            for (const auto& el : data)
+            {
+                stream3 << el;
+            }
+
+            m_tcpServer.SendMessageToNode(socket_send, msg3);
+        }
+    }
+}
+
+
+void Node::slotSerializeDataModified(QTcpSocket* selectedNode, QVector<double>& data)
+{
+
+    QByteArray msg;
+    QDataStream stream(&msg, QIODevice::WriteOnly);
+    msg.resize(0);
+    stream << PKG_DATAMODIFIED;
+    for (const auto& el : data)
+    {
+        stream << el;
+    }
+    m_tcpServer.SendMessageToNode(selectedNode, msg);
+}
+
+void Node::slotSendResultToClient(QVector<QPair<QString, QVector<double>>>& res)
+{
+    QByteArray msg;
+    msg.resize(0);
+    for (const auto& [str, data] : res)
+    { 
+        QDataStream stream(&msg, QIODevice::WriteOnly);
+        stream << PKG_DATAMODIFIED;
+        for (const auto& el : data)
+        {
+            stream << el;
+        }
+    }
+    m_tcpServer.SendMessageToNode(m_clientSocket, msg);
+}
+
+void Node::ParseQStringToIpPort(const QString& str, QHostAddress& ip, quint16& port)
+{
+    QStringList list = str.split(':');
+    ip = QHostAddress(list.at(0));
+    port = list.at(1).toInt();
 }

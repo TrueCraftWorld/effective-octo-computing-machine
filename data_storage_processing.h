@@ -26,16 +26,18 @@ public:
     ~DataStorageProcessing();
 
 signals:
-    void data_tasker_ready(QVector<QPair<QString, QVector<double>>> &data_tasker);
-    void data_worker_ready(QVector<double> &data_worker);
+    void data_tasker_ready(QVector<QPair<QString, QVector<double>>> &data_tasker, QByteArray& formula);
+    void data_worker_ready(QTcpSocket* socket, QVector<double> &data_worker);
     void modified_data_tasker_ready(QVector<QPair<QString, QVector<double>>> &data_tasker);
-    void modified_data_worker_ready(QVector<double> &data_worker);
+    void modified_data_worker_ready(QTcpSocket* socket, QVector<double> &data_worker);
 
 public slots:
     void fill_data(QTcpSocket* socket, QSharedPointer<QVector<double>> ptr_data);
     void fill_modified_data(QTcpSocket* socket, QSharedPointer<QVector<double>> ptr_data);
     void set_formula(QTcpSocket* socket, QSharedPointer<QByteArray> ptr_formula);
     QByteArray &get_formula();
+    void calculateData(QTcpSocket* socket, QVector<double>& data_worker);
+
 
 private:
     QVector<QPair<QString, QVector<double>>> data_tasker;  /// данные для обработки в режиме планировщика задач

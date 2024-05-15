@@ -33,11 +33,12 @@ public:
 signals:
     void node_info_updated(NodeID id);  /// список с данными узлов обновился
     void transmit_data_node(QByteArray& data);  /// отправка данных по udp
-    void signalSendTcpInfo(double tempMips, quint32 tempPriority, quint16 tempPort);
+    void node_calculated_own_part(QTcpSocket* socket, QVector<double>& data);
 
 public slots:
     void node_data(NodeData &node_data);  /// данные соседнего узла
     void connect_client(QTcpSocket* socket, quint64 amount_processed_data);  /// подключился клиент
+    void connect_node(QTcpSocket* socket, quint64 amount_processed_data); /// подключился узел
     // void connect_client();  /// TODO: заглушка заменить на строку выше, эту строку удалить
     void slotTcpSocketConnected(QTcpSocket*, QHostAddress ip4, quint16 port);
     void slotTcpSocketDisonnected(QTcpSocket*);
@@ -45,6 +46,12 @@ public slots:
     void slotSendTcpInfo(QTcpSocket* socket);
     void slotCheckConnections();
     void timeout_timer_1hz(QObject* parent);  /// функция вызывается по таймеру раз в секунду
+
+    void slotSerializeDataPrep(QString selectedNode, quint64 dataWaiting); // Принимает DataPrep от изранного узла к нам
+    void slotSerializeFormula(QString selectedNode, QByteArray); // Принимает Formula от изранного узла к нам
+    void slotSerializeDataArray(QVector<QPair<QString, QVector<double>>>& data_tasker, QByteArray& formula); // Принимает DataArray от изранного узла к нам
+    void slotSerializeDataModified(QTcpSocket* selectedNode, QVector<double>& data); // Отсылает datamodified другим избранному узлу
+    void slotSendResultToClient(QVector<QPair<QString, QVector<double>>>& res);
 
 private:
     NodeInfo m_node_info;
@@ -56,6 +63,9 @@ private:
     NodeSerializer m_serializer;
     // QTimer *timer = nullptr;  /// TODO: для отладки, удалить
     bool is_selected_node;
+    QTcpSocket* m_clientSocket;
+private:
+    void ParseQStringToIpPort(const QString& str, QHostAddress& ip, quint16& port);
 };
 
 #endif // NODE_H

@@ -10,6 +10,7 @@
 #include <cmath>
 #include <QRegularExpression>
 #include <QSharedPointer>
+#include "compute_core.h"
 
 
 static bool compare_pair(const QPair<QString, QVector<double>> &value1,
@@ -79,9 +80,12 @@ void DataStorageProcessing::init_tasker(NodeInfo &node_info)
     double dmin = *min;
     double dmax = *max;
 
-    for (quint32 i = 0; i < amount_data_nodes.size(); ++i)
+    if (amount_data_nodes.size() > 1)
     {
-        amount_data_nodes[i] = 0.1 + (amount_data_nodes[i] - dmin) / (dmax - dmin) * (1.1 - 0.1);
+        for (quint32 i = 0; i < amount_data_nodes.size(); ++i)
+        {
+            amount_data_nodes[i] = 0.1 + (amount_data_nodes[i] - dmin) / (dmax - dmin) * (1.1 - 0.1);
+        }
     }
 
     double sum = std::accumulate(amount_data_nodes.begin(), amount_data_nodes.end(), 0.0);
@@ -223,11 +227,11 @@ void DataStorageProcessing::fill_data(QTcpSocket* socket, QSharedPointer<QVector
     {
         if (!is_selected_node)
         {
-            emit data_worker_ready(data_worker);
+            emit data_worker_ready(socket, data_worker);
         }
         else
         {
-            emit data_tasker_ready(data_tasker);
+            emit data_tasker_ready(data_tasker, formula);
         }
     }
 }
@@ -240,7 +244,7 @@ void DataStorageProcessing::fill_data(QTcpSocket* socket, QSharedPointer<QVector
  */
 void DataStorageProcessing::fill_modified_data(QTcpSocket* socket, QSharedPointer<QVector<double>> ptr_data)
 {
-    QVector<double>& data = *ptr_data;
+    QVector<double> data = *ptr_data;
 
     if (amount_processed_data == amount_data_process)
     {
@@ -268,9 +272,14 @@ void DataStorageProcessing::fill_modified_data(QTcpSocket* socket, QSharedPointe
         {
             for (quint32 i = 0; i < data_tasker.size(); ++i)
             {
-                if (data_tasker[i].first == (socket->peerAddress().toString() + ":" + QString::number(socket->peerPort())))
+                QStringList list = data_tasker[i].first.split(':');
+                QHostAddress ip_checker = QHostAddress(list.at(0));
+                if ((socket == nullptr && ip_checker == QHostAddress())
+                    ||
+                    (socket != nullptr && data_tasker[i].first == (socket->peerAddress().toString() + ":" + QString::number(socket->peerPort()))))
                 {
                     data_tasker[i].second.append(data);
+                    amount_data_process -= data.size();
                 }
             }
             qDebug() << data_tasker[0].first.data();
@@ -281,7 +290,7 @@ void DataStorageProcessing::fill_modified_data(QTcpSocket* socket, QSharedPointe
     {
         if (!is_selected_node)
         {
-            emit modified_data_worker_ready(data_worker);
+            emit modified_data_worker_ready(socket, data_worker);
         }
         else
         {
@@ -358,7 +367,7 @@ quint32 DataStorageProcessing::search_required_nodes(quint32 size)
  */
 void DataStorageProcessing::set_formula(QTcpSocket* socket, QSharedPointer<QByteArray> ptr_formula)
 {
-    formula = ptr_formula->data();
+    formula.append(ptr_formula->data(), ptr_formula->size());
 }
 
 
@@ -370,6 +379,13 @@ void DataStorageProcessing::set_formula(QTcpSocket* socket, QSharedPointer<QByte
 QByteArray &DataStorageProcessing::get_formula()
 {
     return formula;
+}
+
+void DataStorageProcessing::calculateData(QTcpSocket* socket, QVector<double>& data_worker)
+{
+    ComputeCore::compute(data_worker, formula);
+    QSharedPointer<QVector<double>> ptrData(&data_worker);
+    fill_modified_data(socket, ptrData);
 }
 
 

@@ -22,11 +22,6 @@ class NodeSerializer : public QObject
 public slots:
 
 	void slotDeserializeMessage(QTcpSocket* socket, QSharedPointer<QByteArray> ptrMsg);
-	void slotSerializeDataPrep(QString selectedNode, quint64 dataWaiting); // Принимает DataPrep от изранного узла к нам
-	void slotSerializeFormula(QString selectedNode, QByteArray); // Принимает Formula от изранного узла к нам
-	void slotSerializeDataPrep(QString selectedNode, QVector<double> data); // Принимает DataArray от изранного узла к нам
-	void slotSerializeDataModified(QString simpleNode, quint64 dataWaiting); // Принимает DataModified от обычного узла к нам
-	void slotSerializeNodeDataTcp(double tempMips, quint32 tempPriority, quint16 tempPort); // Принимает информацию об узле по TCP
 signals:
 	// Сигналы для приёма извне
 	void signalNodeDataTcp(double tempMips, quint32 tempPriority, quint16 tempPort, QTcpSocket* tempSocket);
@@ -36,5 +31,5 @@ signals:
 	void signalDataArray(QTcpSocket* socketSelectedNode, QSharedPointer<QVector<double>> values);
 	void signalDataModified(QTcpSocket* socketSimpleNode, QSharedPointer<QVector<double>> values);
 private:
-	void ParseQStringToIpPort(const QString& str, QHostAddress& ip, quint16& port);
+	
 };

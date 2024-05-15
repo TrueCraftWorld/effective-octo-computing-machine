@@ -11,6 +11,8 @@ void NodeSerializer::slotDeserializeMessage(QTcpSocket* socket, QSharedPointer<Q
 	quint32 tempPriority;  /// приоритет
 	QHostAddress tempIp;
 	quint16 tempPort;
+	QSharedPointer<QByteArray> tempFormula(new QByteArray);
+
 
 	QDataStream streamMsg(*ptrMsg);
 	unsigned char op;
@@ -35,7 +37,9 @@ void NodeSerializer::slotDeserializeMessage(QTcpSocket* socket, QSharedPointer<Q
 		break;
 
 	case PKG_FORMULA:
-		emit signalFormula(socket, ptrMsg);
+		tempFormula->resize(ptrMsg->size() - 1);
+		streamMsg.readRawData(tempFormula->data(), ptrMsg->size() - 1);
+		emit signalFormula(socket, tempFormula);
 		break;
 	case PKG_DATAARRAY:
 		while (!streamMsg.atEnd())

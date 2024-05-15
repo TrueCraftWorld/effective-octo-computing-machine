@@ -10,7 +10,7 @@ class FileInput : public AbstractOutput
 public:
     FileInput(QString filePath);
     ~FileInput();
-    void dataOutput(QSharedPointer<QByteArray>) override final;
+    void dataOutput(QSharedPointer<QByteArray>&) override final;
 signals:
     QByteArray m_ba;
     QFile *m_file;

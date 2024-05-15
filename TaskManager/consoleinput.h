@@ -12,7 +12,7 @@ public:
     ConsoleInput(const ConsoleActions&);
 
 
-    void dataOutput(QSharedPointer<QByteArray>) override final;
+    void dataOutput(QSharedPointer<QByteArray>&) override final;
 
 private:
     QByteArray m_ba;

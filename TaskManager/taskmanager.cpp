@@ -107,7 +107,7 @@ void TaskManager::initialize(StartParams &param)
     if (param.outputFilePath.isEmpty()) {
         m_outputStream = static_cast<AbstractOutput*>(new ConsoleInput(ConsoleActions::DataOut)); //
     } else {
-        m_outputStream = static_cast<AbstractOutput*>(new FileInput(QString("results.txt"))); //
+        m_outputStream = static_cast<AbstractOutput*>(new FileInput(param.outputFilePath)); //
     }
 
     m_serialiser.processInput(m_inputStream, m_formulaStream);

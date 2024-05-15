@@ -45,7 +45,7 @@ FileInput::~FileInput()
     m_file->close();
 }
 
-void FileInput::dataOutput(QSharedPointer<QByteArray> inp)
+void FileInput::dataOutput(QSharedPointer<QByteArray>& inp)
 {
     m_file->close();
 

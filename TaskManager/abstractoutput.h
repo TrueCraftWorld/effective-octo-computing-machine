@@ -6,7 +6,7 @@
 class AbstractOutput : public QDataStream
 {
 public:
-    virtual void dataOutput(QSharedPointer<QByteArray>) = 0;
+    virtual void dataOutput(QSharedPointer<QByteArray>&) = 0;
 };
 
 #endif // ABSTRACTOUTPUT_H

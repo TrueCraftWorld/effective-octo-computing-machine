@@ -13,39 +13,76 @@ SerialiZer::SerialiZer(QObject *parent)
 
 }
 
-void SerialiZer::processDataInput(AbstractOutput * input)
+void SerialiZer::processInput(AbstractOutput *data, AbstractOutput *formula)
 {
     QSharedPointer<QByteArray> dataStorage (new QByteArray());
 
-    input->device()->reset(); //sets position to 0 in all IO diveces but Qstring
+    data->device()->reset(); //sets position to 0 in all IO diveces but Qstring
     quint64 dataCount = 0;
 
     QDataStream stream(dataStorage.get(), QIODevice::ReadWrite);
     stream.setVersion(QDataStream::Qt_5_15);
-    *input >> dataCount;
+    *data >> dataCount;
 
     QSharedPointer<QByteArray> dataInfo (new QByteArray());  //dataInfo litrally can be formed only in here
     dataInfo->clear();
     QDataStream dataInfoStream(dataInfo.get(), QIODevice::ReadWrite);
     dataInfoStream.setVersion(QDataStream::Qt_5_15);
     dataInfoStream << PKG_DATAINFO << dataCount;
-
-
     emit messageReady(dataInfo);
     qDebug() << "dataInfo";
+
+    processFormula(formula);
+
     stream << PKG_DATAARRAY;
 
-    while (!input->atEnd()) {
+    while (!data->atEnd()) {
         double line = 0;
-        *input >> line;
+        *data >> line;
         stream << line;
     }
 
 //    stream.flush();
-    input->device()->close();
+    data->device()->close();
     emit messageReady(dataStorage);
     qDebug() << "sentData";
+
+
 }
+
+//void SerialiZer::processDataInput(AbstractOutput * input)
+//{
+//    QSharedPointer<QByteArray> dataStorage (new QByteArray());
+
+//    input->device()->reset(); //sets position to 0 in all IO diveces but Qstring
+//    quint64 dataCount = 0;
+
+//    QDataStream stream(dataStorage.get(), QIODevice::ReadWrite);
+//    stream.setVersion(QDataStream::Qt_5_15);
+//    *input >> dataCount;
+
+//    QSharedPointer<QByteArray> dataInfo (new QByteArray());  //dataInfo litrally can be formed only in here
+//    dataInfo->clear();
+//    QDataStream dataInfoStream(dataInfo.get(), QIODevice::ReadWrite);
+//    dataInfoStream.setVersion(QDataStream::Qt_5_15);
+//    dataInfoStream << PKG_DATAINFO << dataCount;
+
+
+//    emit messageReady(dataInfo);
+//    qDebug() << "dataInfo";
+//    stream << PKG_DATAARRAY;
+
+//    while (!input->atEnd()) {
+//        double line = 0;
+//        *input >> line;
+//        stream << line;
+//    }
+
+////    stream.flush();
+//    input->device()->close();
+//    emit messageReady(dataStorage);
+//    qDebug() << "sentData";
+//}
 
 void SerialiZer::processReturnData(QSharedPointer<QByteArray> arr)
 {

@@ -110,7 +110,7 @@ void TaskManager::initialize(StartParams &param)
         m_outputStream = static_cast<AbstractOutput*>(new FileInput(QString("results.txt"))); //
     }
 
-    m_serialiser.processDataInput(m_inputStream);
-    m_serialiser.processFormula(m_formulaStream);
+    m_serialiser.processInput(m_inputStream, m_formulaStream);
+//    m_serialiser.processFormula(m_formulaStream);
 }
 

@@ -148,19 +148,20 @@ void DataStorageProcessing::init_worker()
  *   \param   data - данные для обработки
  *   \retval  Нет
  */
-void DataStorageProcessing::fill_data(QTcpSocket* socket, QSharedPointer<QVector<double>> dataPtr)
+void DataStorageProcessing::fill_data(QTcpSocket* socket, QSharedPointer<QVector<double>> ptr_data)
 {
-    QVector<double>& data = *dataPtr;
+    QVector<double>& data = *ptr_data;
+
     if (amount_processed_data >= (amount_data_process + data.size()))
     {
         if (!is_selected_node)
         {
-            data_worker.append(*data);
+            data_worker.append(data);
             amount_data_process += data_worker.size() - amount_data_process;
         }
         else
         {
-            quint32 amount_required_nodes = search_required_nodes(data->size());
+            quint32 amount_required_nodes = search_required_nodes(data.size());
 
             if (amount_data_process == 0)
             {
@@ -170,14 +171,14 @@ void DataStorageProcessing::fill_data(QTcpSocket* socket, QSharedPointer<QVector
                 {
                     size_qvectors += amount_data_nodes[i];
 
-                    if (data->size() < size_qvectors)
+                    if (data.size() < size_qvectors)
                     {
-                        data_tasker[i].second = data->mid(amount_data_process, data->size() - amount_data_process);
-                        amount_data_process += data->size();
+                        data_tasker[i].second = data.mid(amount_data_process, data.size() - amount_data_process);
+                        amount_data_process += data.size();
                     }
                     else
                     {
-                        data_tasker[i].second = data->mid(amount_data_process, amount_data_nodes[i]);
+                        data_tasker[i].second = data.mid(amount_data_process, amount_data_nodes[i]);
                         amount_data_process += amount_data_nodes[i];
                     }
                 }
@@ -193,52 +194,93 @@ void DataStorageProcessing::fill_data(QTcpSocket* socket, QSharedPointer<QVector
                 {
                     size_qvectors += amount_data_nodes[i];
 
-                    if (data->size() < size_qvectors - amount_data_process)
+                    if (data.size() < size_qvectors - amount_data_process)
                     {
                         data_tasker[i].second.clear();
                         data_tasker[i].second = buf;
-                        data_tasker[i].second += data->mid(0, data->size());
-                        amount_data_process += data->size();
+                        data_tasker[i].second += data.mid(0, data.size());
+                        amount_data_process += data.size();
                     }
                     else if (!buf.isEmpty())
                     {
                         data_tasker[i].second.clear();
                         data_tasker[i].second = buf;
-                        data_tasker[i].second += data->mid(0, amount_data_nodes[i] - amount_data_process);
+                        data_tasker[i].second += data.mid(0, amount_data_nodes[i] - amount_data_process);
                         amount_data_process += amount_data_nodes[i] - amount_data_process;
                         buf.clear();
                     }
                     else
                     {
-                        data_tasker[i].second = data->mid(amount_data_process - buf_size, amount_data_nodes[i]);
+                        data_tasker[i].second = data.mid(amount_data_process - buf_size, amount_data_nodes[i]);
                         amount_data_process += amount_data_nodes[i];
                     }
                 }
             }
         }
     }
+
+    if (amount_processed_data == amount_data_process)
+    {
+        if (!is_selected_node)
+        {
+            emit data_worker_ready(data_worker);
+        }
+        else
+        {
+            emit data_tasker_ready(data_tasker);
+        }
+    }
 }
 
 
 /**
- *   \brief   Функция возвращает данные планировщика задач
- *   \param   Нет
- *   \retval  Данные планировщика задач
+ *   \brief   Заполнение обработанных данных
+ *   \param   data - данные для обработки
+ *   \retval  Нет
  */
-QVector<QPair<QString, QVector<double>>> &DataStorageProcessing::get_data_tasker()
+void DataStorageProcessing::fill_modified_data(QTcpSocket* socket, QSharedPointer<QVector<double>> ptr_data)
 {
-    return data_tasker;
-}
+    QVector<double>& data = *ptr_data;
 
+    if (amount_processed_data == amount_data_process)
+    {
+        if (!is_selected_node)
+        {
+            data_worker.clear();
+        }
+        else
+        {
+            for (quint32 i = 0; i < data_tasker.size(); ++i)
+            {
+                data_tasker[i].second.clear();
+            }
+        }
+    }
 
-/**
- *   \brief   Функция возвращает данные вычислительного узла
- *   \param   Нет
- *   \retval  Данные вычислительного узла
- */
-QVector<double> &DataStorageProcessing::get_data_worker()
-{
-    return data_worker;
+    if (amount_data_process >= 0)
+    {
+        if (!is_selected_node)
+        {
+            data_worker.append(data);
+            amount_data_process += data_worker.size() - amount_data_process;
+        }
+        else
+        {
+            qDebug() << data_tasker[0].first.data();
+        }
+    }
+
+    if (amount_data_process == 0)
+    {
+        if (!is_selected_node)
+        {
+            emit modified_data_worker_ready(data_worker);
+        }
+        else
+        {
+            emit modified_data_tasker_ready(data_tasker);
+        }
+    }
 }
 
 
@@ -307,7 +349,7 @@ quint32 DataStorageProcessing::search_required_nodes(quint32 size)
  *   \param   ptr_formula - формула
  *   \retval  Нет
  */
-void DataStorageProcessing::set_formula(QSharedPointer<QByteArray> ptr_formula)
+void DataStorageProcessing::set_formula(QTcpSocket* socket, QSharedPointer<QByteArray> ptr_formula)
 {
     formula = ptr_formula->data();
 }

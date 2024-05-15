@@ -8,16 +8,18 @@
 #include "compute_core.h"
 #include "element.h"
 #include "commands.h"
-
-#include <QTextStream>
+#include <QDataStream>
 #include <QStack>
 
 
 void ComputeCore::compute(QVector<double> &data, QByteArray &formula_ba)
 {
-    QTextStream formula(&formula_ba, QIODevice::ReadWrite);
+    if (data.isEmpty()) return;
+    if (formula_ba.isEmpty()) return;
+    QDataStream formula(&formula_ba, QIODevice::ReadWrite);
+    formula.device()->reset();
     QStack<Element> stack;
-    char op = START;
+    quint8 op = START;
 
     while (op != END)
     {

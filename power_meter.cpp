@@ -11,6 +11,7 @@
 #include "compute_core.h"
 
 #include <QTextStream>
+#include <QDataStream>
 #include <QRandomGenerator>
 
 
@@ -79,7 +80,7 @@ QByteArray PowerMeter::prep_formula()
 
     //formula readOut
     QByteArray actions;
-    QTextStream stream_vm_out(&actions, QIODevice::ReadWrite);
+    QDataStream stream_vm_out(&actions, QIODevice::ReadWrite);
     bool is_double_value;
 
     while (!form_stream.atEnd())
@@ -145,9 +146,7 @@ QByteArray PowerMeter::prep_formula()
     }
 
     stream_vm_out << END;
-    stream_vm_out.flush();
     stream_vm_out.device()->reset();
-    stream_vm_out.reset();
 
     return actions; //believe in RVO
 }

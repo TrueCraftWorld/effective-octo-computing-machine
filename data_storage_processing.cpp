@@ -266,6 +266,13 @@ void DataStorageProcessing::fill_modified_data(QTcpSocket* socket, QSharedPointe
         }
         else
         {
+            for (quint32 i = 0; i < data_tasker.size(); ++i)
+            {
+                if (data_tasker[i].first == (socket->peerAddress().toString() + ":" + socket->peerPort()))
+                {
+                    data_tasker[i].second.append(data);
+                }
+            }
             qDebug() << data_tasker[0].first.data();
         }
     }

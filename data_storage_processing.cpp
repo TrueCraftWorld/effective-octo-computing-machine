@@ -1,8 +1,8 @@
 
 /**
  *   \file     data_storage_processing.cpp
- *   \version  0.05
- *   \date     2024.05.14
+ *   \version  0.06
+ *   \date     2024.05.15
  */
 
 #include "data_storage_processing.h"
@@ -268,7 +268,7 @@ void DataStorageProcessing::fill_modified_data(QTcpSocket* socket, QSharedPointe
         {
             for (quint32 i = 0; i < data_tasker.size(); ++i)
             {
-                if (data_tasker[i].first == (socket->peerAddress().toString() + ":" + socket->peerPort()))
+                if (data_tasker[i].first == (socket->peerAddress().toString() + ":" + QString::number(socket->peerPort())))
                 {
                     data_tasker[i].second.append(data);
                 }

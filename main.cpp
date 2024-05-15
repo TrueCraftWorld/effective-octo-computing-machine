@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a_node(argc, argv);
     QCoreApplication::setApplicationName("Node");
-    QCoreApplication::setApplicationVersion("0.4");
+    QCoreApplication::setApplicationVersion("0.13");
     Options_command_line options_command_line = { static_cast<quint16>(Udp_socket_setting::MULTICAST_PORT),
                                                   default_ip,
                                                   false };

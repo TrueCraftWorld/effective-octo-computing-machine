@@ -53,7 +53,7 @@ void TaskManager::initialize(StartParams &param)
 {
 
     QObject::connect(&m_serialiser, &SerialiZer::messageReady, this,
-                     [this](QSharedPointer<QByteArray> msg) {
+                     [this](QSharedPointer<QByteArray> &msg) {
         m_tcp_side.SendMessageToNode(m_targetNode.soc, *msg);
     });
 
@@ -66,7 +66,7 @@ void TaskManager::initialize(StartParams &param)
     QObject::connect(&m_tcp_side, &TcpModule::signalSendDataToSerializer, &m_serialiser,  &SerialiZer::processReturnData);
 
     QObject::connect(&m_serialiser, &SerialiZer::resultsAccepted, this,
-                     [this](QSharedPointer<QByteArray> msg) {
+                     [this](QSharedPointer<QByteArray> &msg) {
         m_outputStream->dataOutput(msg);
     });
 

@@ -25,11 +25,11 @@ public:
     explicit SerialiZer(QObject *parent = nullptr);
     void processInput(AbstractOutput* data, AbstractOutput* formula);
 
-    void processReturnData(QSharedPointer<QByteArray>);
+    void processReturnData(QSharedPointer<QByteArray>&);
 
 signals:
-    void messageReady(QSharedPointer<QByteArray>);
-    void resultsAccepted(QSharedPointer<QByteArray>);
+    void messageReady(QSharedPointer<QByteArray>&);
+    void resultsAccepted(QSharedPointer<QByteArray>&);
 
 private:
     void processFormula(AbstractOutput*);

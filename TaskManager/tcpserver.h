@@ -26,7 +26,7 @@ private:
     void ReadDataFromTcp(QDataStream* stream, qint32& bytesAvailable);
 
 signals:
-    void signalSendDataToSerializer(QSharedPointer<QByteArray> ptrMsg);
+    void signalSendDataToSerializer(QSharedPointer<QByteArray> &ptrMsg);
     void signalSocketDisconnected(QTcpSocket* socketForDisconnect);
     void signalSocketConnected(QTcpSocket* socketForConnect, QHostAddress ip4, quint16 port);
 

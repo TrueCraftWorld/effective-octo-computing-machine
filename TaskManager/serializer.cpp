@@ -84,7 +84,7 @@ void SerialiZer::processInput(AbstractOutput *data, AbstractOutput *formula)
 //    qDebug() << "sentData";
 //}
 
-void SerialiZer::processReturnData(QSharedPointer<QByteArray> arr)
+void SerialiZer::processReturnData(QSharedPointer<QByteArray>& arr)
 {
 
     QDataStream input(arr.get(), QIODevice::ReadWrite);

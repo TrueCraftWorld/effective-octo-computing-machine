@@ -23,8 +23,8 @@ class SerialiZer : public QObject
     Q_OBJECT
 public:
     explicit SerialiZer(QObject *parent = nullptr);
-    void processFormula(AbstractOutput*);
-    void processDataInput(AbstractOutput*);
+    void processInput(AbstractOutput* data, AbstractOutput* formula);
+
     void processReturnData(QSharedPointer<QByteArray>);
 
 signals:
@@ -32,8 +32,9 @@ signals:
     void resultsAccepted(QSharedPointer<QByteArray>);
 
 private:
-
-    void addCommomInfo(QSharedPointer<QByteArray>);
+    void processFormula(AbstractOutput*);
+//    void processDataInput(AbstractOutput*);
+//    void addCommomInfo(QSharedPointer<QByteArray>);
 
     SerialMode m_workMode = SerialMode::SEND_CHAR;
 };

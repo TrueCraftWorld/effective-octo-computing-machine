@@ -13,7 +13,7 @@
 #include <QStack>
 
 
-void ComputeCore::compute(QVector<double> &data, QByteArray &formula_ba)
+void ComputeCore::compute(QVector<double>& data, QByteArray &formula_ba)
 {
     QTextStream formula(&formula_ba, QIODevice::ReadWrite);
     QStack<Element> stack;
@@ -35,7 +35,7 @@ void ComputeCore::compute(QVector<double> &data, QByteArray &formula_ba)
                 break;
 
             case ARR:
-                stack.push({ &data[0], &data[data.size() - 1] });
+                stack.push({ &data[0], &data[data.size() - 1]});
 
                 break;
 

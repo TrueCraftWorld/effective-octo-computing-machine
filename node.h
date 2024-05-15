@@ -59,8 +59,8 @@ private:
     DataStorageProcessing *m_data_storage_processing = nullptr;
     QTimer* m_timerCheckerExistedTcpConnections;
     QTimer* timer_1hz = nullptr;
-    TcpModule m_tcpServer;
-    NodeSerializer m_serializer;
+    TcpModule* m_tcpServer;
+    NodeSerializer* m_serializer;
     // QTimer *timer = nullptr;  /// TODO: для отладки, удалить
     bool is_selected_node;
     QTcpSocket* m_clientSocket;

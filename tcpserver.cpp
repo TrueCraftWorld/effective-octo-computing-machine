@@ -16,7 +16,7 @@ constexpr unsigned char PKG_DATAARRAY = 0xD0;
 constexpr unsigned char PKG_DATAMODIFIED = 0xE0;
 constexpr unsigned char PKG_CONNECTIONCHECK = 0xF0;
 
-TcpModule::TcpModule(quint16 port)
+TcpModule::TcpModule(QObject* parent, quint16 port) : QTcpServer{ parent }
 {
 	m_isAwaitingAdditionalData = false;
 	if (this->listen(QHostAddress::Any, port))

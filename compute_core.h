@@ -9,6 +9,7 @@
 #define COMPUTECORE_H
 
 #include <QVector>
+#include <QSharedPointer>
 
 
 class ComputeCore

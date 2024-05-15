@@ -242,9 +242,8 @@ void DataStorageProcessing::fill_data(QTcpSocket* socket, QSharedPointer<QVector
  *   \param   data - данные для обработки
  *   \retval  Нет
  */
-void DataStorageProcessing::fill_modified_data(QTcpSocket* socket, QSharedPointer<QVector<double>> ptr_data)
+void DataStorageProcessing::fill_modified_data(QTcpSocket* socket, QVector<double>& data)
 {
-    QVector<double> data = *ptr_data;
 
     if (amount_processed_data == amount_data_process)
     {
@@ -256,7 +255,12 @@ void DataStorageProcessing::fill_modified_data(QTcpSocket* socket, QSharedPointe
         {
             for (quint32 i = 0; i < data_tasker.size(); ++i)
             {
-                data_tasker[i].second.clear();
+                QStringList list = data_tasker[i].first.split(':');
+                QHostAddress ip_checker = QHostAddress(list.at(0));
+                if (socket != nullptr || ip_checker != QHostAddress())
+                {
+                    data_tasker[i].second.clear();
+                }
             }
         }
     }
@@ -274,11 +278,13 @@ void DataStorageProcessing::fill_modified_data(QTcpSocket* socket, QSharedPointe
             {
                 QStringList list = data_tasker[i].first.split(':');
                 QHostAddress ip_checker = QHostAddress(list.at(0));
-                if ((socket == nullptr && ip_checker == QHostAddress())
-                    ||
-                    (socket != nullptr && data_tasker[i].first == (socket->peerAddress().toString() + ":" + QString::number(socket->peerPort()))))
+                if (socket != nullptr && data_tasker[i].first == (socket->peerAddress().toString() + ":" + QString::number(socket->peerPort())))
                 {
                     data_tasker[i].second.append(data);
+                    amount_data_process -= data.size();
+                }
+                else if (socket == nullptr && ip_checker == QHostAddress())
+                {
                     amount_data_process -= data.size();
                 }
             }
@@ -381,11 +387,11 @@ QByteArray &DataStorageProcessing::get_formula()
     return formula;
 }
 
-void DataStorageProcessing::calculateData(QTcpSocket* socket, QVector<double>& data_worker)
+void DataStorageProcessing::calculateData(QTcpSocket* socket, QVector<double>& data)
 {
-    ComputeCore::compute(data_worker, formula);
-    QSharedPointer<QVector<double>> ptrData(&data_worker);
-    fill_modified_data(socket, ptrData);
+    ComputeCore::compute(data, formula);
+    fill_modified_data(socket, data);
+    //qDebug() << "fuck";
 }
 
 

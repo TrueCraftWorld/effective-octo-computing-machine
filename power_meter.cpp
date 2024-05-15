@@ -12,6 +12,7 @@
 
 #include <QTextStream>
 #include <QRandomGenerator>
+#include <QSharedPointer>
 
 
 /**

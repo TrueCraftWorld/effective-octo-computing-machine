@@ -13,7 +13,7 @@ class TcpModule : public QTcpServer
 {
 	Q_OBJECT
 public:
-	TcpModule(quint16 port = 0);
+	TcpModule(QObject* parent, quint16 port = 0);
 	void SendMessageToNode(QTcpSocket* socket, QByteArray& msg);
 
 private:

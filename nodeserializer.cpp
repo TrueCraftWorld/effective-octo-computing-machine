@@ -55,7 +55,7 @@ void NodeSerializer::slotDeserializeMessage(QTcpSocket* socket, QSharedPointer<Q
 			streamMsg >> temp;
 			(*ptrList).push_back(temp);
 		}
-		emit signalDataModified(socket, ptrList);
+		emit signalDataModified(socket, *ptrList);
         break;
 	}
 }

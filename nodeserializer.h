@@ -36,5 +36,5 @@ signals:
 	void signalDataArray(QTcpSocket* socketSelectedNode, QSharedPointer<QVector<double>> values);
 	void signalDataModified(QTcpSocket* socketSimpleNode, QSharedPointer<QVector<double>> values);
 private:
-
+	void ParseQStringToIpPort(const QString& str, QHostAddress& ip, quint16& port);
 };

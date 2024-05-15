@@ -79,3 +79,10 @@ void NodeSerializer::slotSerializeDataModified(QString simpleNode, quint64 dataW
 void NodeSerializer::slotSerializeNodeDataTcp(double tempMips, quint32 tempPriority, quint16 tempPort)
 {
 }
+
+void NodeSerializer::ParseQStringToIpPort(const QString& str, QHostAddress& ip, quint16& port)
+{
+	QStringList list = str.split(':');
+	ip = QHostAddress(list.at(0));
+	port = list.at(1).toInt();
+}

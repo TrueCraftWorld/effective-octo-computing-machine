@@ -119,7 +119,7 @@ void DataStorageProcessing::init_tasker(NodeInfo &node_info)
 
     for (auto it = data_tasker.begin(); it != data_tasker.end(); ++it)
     {
-        qDebug() << it->first << it->second.size();
+        // qDebug() << it->first << it->second.size();
         it->second.clear();
     }
 
@@ -302,7 +302,7 @@ void DataStorageProcessing::fill_modified_data(QTcpSocket* socket, QVector<doubl
                     break;
                 }
             }
-            qDebug() << data_tasker[0].first.data();
+            // qDebug() << data_tasker[0].first.data();
         }
     }
 

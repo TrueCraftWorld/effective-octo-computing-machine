@@ -113,7 +113,7 @@ QByteArray PowerMeter::prep_formula()
                     break;
 
                 case '^':
-                    stream_vm_out << POW;
+                    stream_vm_out << DIV;
 
                     break;
 

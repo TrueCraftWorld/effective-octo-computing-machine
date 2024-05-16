@@ -33,7 +33,7 @@ signals:
 
 public slots:
     void fill_data(QTcpSocket* socket, QSharedPointer<QVector<double>> ptr_data);
-    void fill_modified_data(QTcpSocket* socket, QVector<double>& data);
+    void fill_modified_data(QTcpSocket* socket, QVector<double>& data, std::list<NodeData> neighbours);
     void set_formula(QTcpSocket* socket, QSharedPointer<QByteArray> ptr_formula);
     QByteArray &get_formula();
     void calculateData(QTcpSocket* socket, QVector<double>& data);

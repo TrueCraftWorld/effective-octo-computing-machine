@@ -212,48 +212,41 @@ NodeInfo &Node::get_node_info()
  *   \retval  Нет
  */
 void Node::connect_node(QTcpSocket* socket, quint64 amount_processed_data)
-// void Node::connect_client()
 {
-    //// Удаляем клиента из "списка узлов"
-    //m_clientSocket = socket;
-    //m_node_info.neighbour_nodes.erase(
-    //    std::remove_if(
-    //        m_node_info.neighbour_nodes.begin(),
-    //        m_node_info.neighbour_nodes.end(),
-    //        [socket](const NodeData& data) { return data.socket == socket; }),
-    //    m_node_info.neighbour_nodes.end());
 
-    //// quint64 amount_processed_data = 1000000;  /// TODO: заглушка количества обрабатываемых данных, удалить
-    //qDebug() << "Количество узлов в вычислительном кластере" << m_node_info.neighbour_nodes.size() + 1;
-    //qDebug() << "Вычислительная мощьность текущего узла" << m_node_info.mips;
-    //if (!m_node_info.neighbour_nodes.empty())
-    //{
-    //    qDebug() << "Вычислительные мощьности соседий";
-    //    std::list<NodeData>::iterator it;
+    // quint64 amount_processed_data = 1000000;  /// TODO: заглушка количества обрабатываемых данных, удалить
+    qDebug() << "Количество узлов в вычислительном кластере" << m_node_info.neighbour_nodes.size() + 1;
+    qDebug() << "Вычислительная мощьность текущего узла" << m_node_info.mips;
+    if (!m_node_info.neighbour_nodes.empty())
+    {
+        qDebug() << "Вычислительные мощьности соседий";
+        std::list<NodeData>::iterator it;
 
-    //    for (it = m_node_info.neighbour_nodes.begin(); it != m_node_info.neighbour_nodes.end(); ++it)
-    //    {
-    //        // qDebug() << it->node_id.ip;
-    //        // qDebug() << it->node_id.port;
-    //        // qDebug() << it->priority;
-    //        // it->mips = QRandomGenerator::global()->bounded(1, 1000000);  /// TODO: заглушка вычилсительной мощности, удалить
-    //        // qDebug() << it->mips;
-    //    }
-    //}
+        for (it = m_node_info.neighbour_nodes.begin(); it != m_node_info.neighbour_nodes.end(); ++it)
+        {
+            // qDebug() << it->node_id.ip;
+            // qDebug() << it->node_id.port;
+            // qDebug() << it->priority;
+            // it->mips = QRandomGenerator::global()->bounded(1, 1000000);  /// TODO: заглушка вычилсительной мощности, удалить
+            // qDebug() << it->mips;
+        }
+    }
 
-    //m_data_storage_processing = new DataStorageProcessing(this, false, m_node_info, amount_processed_data);
-    //// m_data_storage_processing = new DataStorageProcessing(this, true, m_node_info, amount_processed_data);  /// TODO: заглушка, замениьт на строку выше, а эту удалить
-    //m_data_storage_processing->setObjectName("dst");
-    //connect(m_serializer, &NodeSerializer::signalDataArray, m_data_storage_processing, &DataStorageProcessing::fill_data);
-    //connect(m_serializer, &NodeSerializer::signalFormula, m_data_storage_processing, &DataStorageProcessing::set_formula);
-    //connect(m_serializer, &NodeSerializer::signalDataModified, m_data_storage_processing, &DataStorageProcessing::fill_data);
-    //connect(m_data_storage_processing, &DataStorageProcessing::data_tasker_ready, this, &Node::slotSerializeDataArray);
-    //connect(m_data_storage_processing, &DataStorageProcessing::data_worker_ready, m_data_storage_processing, &DataStorageProcessing::calculateData);
-    //connect(this, &Node::node_calculated_own_part, m_data_storage_processing, &DataStorageProcessing::calculateData);
+    m_data_storage_processing = new DataStorageProcessing(this, false, m_node_info, amount_processed_data);
+    // m_data_storage_processing = new DataStorageProcessing(this, true, m_node_info, amount_processed_data);  /// TODO: заглушка, замениьт на строку выше, а эту удалить
+    m_data_storage_processing->setObjectName("dst");
+    connect(m_serializer, &NodeSerializer::signalDataArray, m_data_storage_processing, &DataStorageProcessing::fill_data);
+    connect(m_serializer, &NodeSerializer::signalFormula, m_data_storage_processing, &DataStorageProcessing::set_formula);
+    connect(m_serializer, &NodeSerializer::signalDataModified, m_data_storage_processing,
+        [this](QTcpSocket* socket, QVector<double> vec)
+        {emit m_data_storage_processing->fill_modified_data(socket, vec, m_node_info.neighbour_nodes); });
+    connect(m_data_storage_processing, &DataStorageProcessing::data_tasker_ready, this, &Node::slotSerializeDataArray);
+    connect(m_data_storage_processing, &DataStorageProcessing::data_worker_ready, m_data_storage_processing, &DataStorageProcessing::calculateData);
+    connect(this, &Node::node_calculated_own_part, m_data_storage_processing, &DataStorageProcessing::calculateData);
 
-    //
-    //connect(m_data_storage_processing, &DataStorageProcessing::modified_data_worker_ready, this, &Node::slotSerializeDataModified);
-    //connect(m_data_storage_processing, &DataStorageProcessing::modified_data_tasker_ready, this, &Node::slotSendResultToClient);
+    
+    connect(m_data_storage_processing, &DataStorageProcessing::modified_data_worker_ready, this, &Node::slotSerializeDataModified);
+    connect(m_data_storage_processing, &DataStorageProcessing::modified_data_tasker_ready, this, &Node::slotSendResultToClient);
 }
 
 void Node::connect_client(QTcpSocket* socket, quint64 amount_processed_data)
@@ -291,7 +284,9 @@ void Node::connect_client(QTcpSocket* socket, quint64 amount_processed_data)
     m_data_storage_processing->setObjectName("dst");
     connect(m_serializer, &NodeSerializer::signalDataArray, m_data_storage_processing, &DataStorageProcessing::fill_data);
     connect(m_serializer, &NodeSerializer::signalFormula, m_data_storage_processing, &DataStorageProcessing::set_formula);
-    connect(m_serializer, &NodeSerializer::signalDataModified, m_data_storage_processing, &DataStorageProcessing::fill_modified_data);
+    connect(m_serializer, &NodeSerializer::signalDataModified, m_data_storage_processing,
+        [this](QTcpSocket* socket, QVector<double> vec)
+        {emit m_data_storage_processing->fill_modified_data(socket, vec, m_node_info.neighbour_nodes); });
     connect(m_data_storage_processing, &DataStorageProcessing::data_tasker_ready, this, &Node::slotSerializeDataArray);
     connect(this, &Node::node_calculated_own_part, m_data_storage_processing, &DataStorageProcessing::calculateData);
 
@@ -328,8 +323,8 @@ void Node::slotUpdateTcpInfo(double mips, quint32 priority, quint16 port, QTcpSo
         {
             info.mips = mips;
             info.priority = priority;
-            info.node_id.port = socket->peerPort();
-            info.node_id.ip = socket->peerAddress();
+            info.node_id.port = port;
+            info.node_id.ip = QHostAddress(socket->peerAddress().toIPv4Address());
             break;
         }
     }
@@ -395,7 +390,7 @@ void Node::slotSerializeDataPrep(QString selectedNode, quint64 dataWaiting)
 
     for (const auto& info : m_node_info.neighbour_nodes)
     {
-        if (info.node_id.ip == ip && info.node_id.port == port)
+        if (info.node_id.ip.toIPv4Address() == ip.toIPv4Address() && info.node_id.port == port)
         {
             m_tcpServer->SendMessageToNode(info.socket, msg);
         }
@@ -411,7 +406,7 @@ void Node::slotSerializeFormula(QString selectedNode, QByteArray formula)
 
     for (const auto& info : m_node_info.neighbour_nodes)
     {
-        if (info.node_id.ip == ip && info.node_id.port == port)
+        if (info.node_id.ip.toIPv4Address() == ip.toIPv4Address() && info.node_id.port == port)
         {
             m_tcpServer->SendMessageToNode(info.socket, formula);
         }
@@ -426,8 +421,7 @@ void Node::slotSerializeDataArray(QVector<QPair<QString, QVector<double>>>& data
         quint16 port;
 
         ParseQStringToIpPort(str, ip, port);
-
-        if (ip == QHostAddress())
+        if (ip.toIPv4Address() == QHostAddress().toIPv4Address())
         {
             QVector<double>& ptrData(data);
             emit node_calculated_own_part(nullptr, ptrData);
@@ -437,7 +431,8 @@ void Node::slotSerializeDataArray(QVector<QPair<QString, QVector<double>>>& data
             QTcpSocket* socket_send = nullptr;
             for (const auto& info : m_node_info.neighbour_nodes)
             {
-                if (info.node_id.ip == ip && info.node_id.port == port)
+                qDebug() << info.socket->peerPort() << info.node_id.ip << ip;
+                if (info.node_id.ip.toIPv4Address() == ip.toIPv4Address() && (info.node_id.port == port))
                 {
                     socket_send = info.socket;
                     break;
@@ -449,15 +444,16 @@ void Node::slotSerializeDataArray(QVector<QPair<QString, QVector<double>>>& data
             QDataStream stream1(&msg1, QIODevice::WriteOnly);
             stream1.device()->reset();
             stream1 << PKG_DATAPREP;
-            stream1 << data.size();
+            stream1 << quint64(data.size());
 
             m_tcpServer->SendMessageToNode(socket_send, msg1);
 
             QByteArray msg2;
-            msg2.resize(0);
+            msg2.resize(sizeof(char) + formula.size());
             QDataStream stream2(&msg2, QIODevice::WriteOnly);
             stream2.device()->reset();
             stream2 << PKG_FORMULA;
+            stream2 << formula;
 
             m_tcpServer->SendMessageToNode(socket_send, msg2);
 
@@ -495,10 +491,10 @@ void Node::slotSendResultToClient(QVector<QPair<QString, QVector<double>>>& res)
 {
     QByteArray msg;
     msg.resize(0);
+    QDataStream stream(&msg, QIODevice::WriteOnly);
+    stream << PKG_DATAMODIFIED;
     for (const auto& [str, data] : res)
     { 
-        QDataStream stream(&msg, QIODevice::WriteOnly);
-        stream << PKG_DATAMODIFIED;
         for (const auto& el : data)
         {
             stream << el;
@@ -511,6 +507,15 @@ void Node::slotSendResultToClient(QVector<QPair<QString, QVector<double>>>& res)
 void Node::ParseQStringToIpPort(const QString& str, QHostAddress& ip, quint16& port)
 {
     QStringList list = str.split(':');
-    ip = QHostAddress(list.at(0));
-    port = list.at(1).toInt();
+    if (list.size() == 2)
+    {
+        ip = QHostAddress(list.at(0));
+        port = list.at(1).toInt();
+    }
+    else
+    {
+        ip = QHostAddress(list.at(3));
+        port = list.at(4).toInt();
+    }
 }
+

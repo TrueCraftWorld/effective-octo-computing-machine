@@ -51,6 +51,8 @@ void FileInput::dataOutput(QSharedPointer<QByteArray> inp)
 
     if (m_file->open(QIODevice::ReadWrite)) {
         QDataStream tmp(inp.get(), QIODevice::ReadWrite);
+        quint8 temp;
+        tmp >> temp;
         while (!tmp.atEnd()) {
             double val;
             tmp >> val;

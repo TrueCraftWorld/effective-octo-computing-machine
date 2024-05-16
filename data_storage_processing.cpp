@@ -247,29 +247,28 @@ void DataStorageProcessing::fill_modified_data(QTcpSocket* socket, QVector<doubl
 
     if (amount_processed_data == amount_data_process)
     {
-        if (!is_selected_node)
-        {
-            data_worker.clear();
-        }
-        else
-        {
-            for (quint32 i = 0; i < data_tasker.size(); ++i)
-            {
-                QStringList list = data_tasker[i].first.split(':');
-                QHostAddress ip_checker = QHostAddress(list.at(0));
-                if (socket != nullptr || ip_checker != QHostAddress())
-                {
-                    data_tasker[i].second.clear();
-                }
-            }
-        }
+        //if (!is_selected_node)
+        //{
+        //    data_worker.clear();
+        //}
+        //else
+        //{
+        //    for (quint32 i = 0; i < data_tasker.size(); ++i)
+        //    {
+        //        QStringList list = data_tasker[i].first.split(':');
+        //        QHostAddress ip_checker = QHostAddress(list.at(0));
+        //        if (socket != nullptr || ip_checker != QHostAddress())
+        //        {
+        //            data_tasker[i].second.clear();
+        //        }
+        //    }
+        //}
     }
 
     if (amount_data_process >= 0)
     {
         if (!is_selected_node)
         {
-            data_worker.append(data);
             amount_data_process -= data.size();
         }
         else
@@ -280,12 +279,14 @@ void DataStorageProcessing::fill_modified_data(QTcpSocket* socket, QVector<doubl
                 QHostAddress ip_checker = QHostAddress(list.at(0));
                 if (socket != nullptr && data_tasker[i].first == (socket->peerAddress().toString() + ":" + QString::number(socket->peerPort())))
                 {
-                    data_tasker[i].second.append(data);
+                    data_tasker[i].second = data;
                     amount_data_process -= data.size();
+                    break;
                 }
                 else if (socket == nullptr && ip_checker == QHostAddress())
                 {
                     amount_data_process -= data.size();
+                    break;
                 }
             }
             qDebug() << data_tasker[0].first.data();
@@ -389,8 +390,12 @@ QByteArray &DataStorageProcessing::get_formula()
 
 void DataStorageProcessing::calculateData(QTcpSocket* socket, QVector<double>& data)
 {
-    ComputeCore::compute(data, formula);
-    fill_modified_data(socket, data);
+    if (data.size() == 0) return;
+    else
+    {
+        ComputeCore::compute(data, formula);
+        fill_modified_data(socket, data);
+    }
     //qDebug() << "fuck";
 }
 

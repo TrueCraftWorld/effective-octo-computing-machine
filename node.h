@@ -53,6 +53,7 @@ public slots:
     void slotSerializeDataModified(QTcpSocket* selectedNode, QVector<double>& data); // Отсылает datamodified другим избранному узлу
     void slotSendResultToClient(QVector<QPair<QString, QVector<double>>>& res);
 
+
 private:
     NodeInfo m_node_info;
     DiscoveryService *m_discovery_service = nullptr;

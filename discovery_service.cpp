@@ -53,6 +53,7 @@ void DiscoveryService::receive_data_node(QByteArray& data)
 
     stream.setVersion(QDataStream::Qt_5_15);
     stream >> node_data.node_id.ip;
+    node_data.node_id.ip = QHostAddress(node_data.node_id.ip.toIPv4Address());
     stream >> sizeOfDatagram;
     stream >> node_data.node_id.port;
     stream >> node_data.priority;

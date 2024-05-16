@@ -11,6 +11,8 @@
 #include <QRegularExpression>
 #include <QSharedPointer>
 #include "compute_core.h"
+#include "node.h"
+#include <list>
 
 
 static bool compare_pair(const QPair<QString, QVector<double>> &value1,
@@ -242,7 +244,7 @@ void DataStorageProcessing::fill_data(QTcpSocket* socket, QSharedPointer<QVector
  *   \param   data - данные для обработки
  *   \retval  Нет
  */
-void DataStorageProcessing::fill_modified_data(QTcpSocket* socket, QVector<double>& data)
+void DataStorageProcessing::fill_modified_data(QTcpSocket* socket, QVector<double>& data, std::list<NodeData> neighbours = {})
 {
 
     if (amount_processed_data == amount_data_process)
@@ -265,6 +267,17 @@ void DataStorageProcessing::fill_modified_data(QTcpSocket* socket, QVector<doubl
         //}
     }
 
+    quint16 port_ext;
+    QHostAddress ip_ext;
+    for (const auto& info : neighbours)
+    {
+        if (info.socket == socket)
+        {
+            port_ext = info.node_id.port;
+            ip_ext = info.node_id.ip;
+        }
+    }
+
     if (amount_data_process >= 0)
     {
         if (!is_selected_node)
@@ -277,7 +290,7 @@ void DataStorageProcessing::fill_modified_data(QTcpSocket* socket, QVector<doubl
             {
                 QStringList list = data_tasker[i].first.split(':');
                 QHostAddress ip_checker = QHostAddress(list.at(0));
-                if (socket != nullptr && data_tasker[i].first == (socket->peerAddress().toString() + ":" + QString::number(socket->peerPort())))
+                if (socket != nullptr && data_tasker[i].first == (ip_ext.toString() + ":" + QString::number(port_ext)))
                 {
                     data_tasker[i].second = data;
                     amount_data_process -= data.size();

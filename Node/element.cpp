@@ -41,6 +41,11 @@ void Element::operator*=(Element& rhs)
     BinaryOperation(rhs, [] (double& lhs, double& rhs) { return lhs *= rhs; } );
 }
 
+void Element::operator/=(Element& rhs)
+{
+    BinaryOperation(rhs, [](double& lhs, double& rhs) { return lhs /= rhs; });
+}
+
 void Element::ePow(Element& rhs)
 {
     BinaryOperation(rhs, [] (double& lhs, double& rhs) { return lhs = pow(lhs, rhs); } );

@@ -57,9 +57,9 @@ void ComputeCore::compute(QVector<double>& data, QByteArray &formula_ba)
 
                 break;
 
-            case POW:
+            case DIV:
                 xe = stack.pop();
-                stack.top().ePow(xe);
+                stack.top() /= xe;
 
                 break;
 

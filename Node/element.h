@@ -100,6 +100,7 @@ public:
     void operator+=(Element& rhs);
     void operator-=(Element& rhs);
     void operator*=(Element& rhs);
+    void operator/=(Element& rhs);
     void ePow(Element& rhs);
 
     template<typename Predicate>

@@ -107,12 +107,14 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
 void ConsoleInput::dataOutput(QSharedPointer<QByteArray> inp)
 {
     double tmp = 0;
-    unsigned char command = 0;
-    *this << *inp;
-    device()->reset();
-    *this >> command;
-    while (!atEnd()) {
-        *this >> tmp;
+    quint8 command = 0;
+//        device()->reset();
+//    *this << *inp;
+//    device()->reset();
+    QDataStream tmpStream(inp.get(), QIODevice::ReadWrite);
+    tmpStream >> command;
+    while (!tmpStream.atEnd()) {
+        tmpStream >> tmp;
         std::cout << tmp << std::endl;
     }
 }

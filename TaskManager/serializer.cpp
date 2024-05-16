@@ -35,6 +35,8 @@ void SerialiZer::processInput(AbstractOutput *data, AbstractOutput *formula)
     processFormula(formula);
 
     stream << PKG_DATAARRAY;
+    quint32 tempSize;
+    *data >> tempSize;
 
     while (!data->atEnd()) {
         double line = 0;

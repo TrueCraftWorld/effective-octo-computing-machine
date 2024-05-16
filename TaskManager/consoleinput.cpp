@@ -106,12 +106,13 @@ ConsoleInput::ConsoleInput(const ConsoleActions& actionType)
 
 void ConsoleInput::dataOutput(QSharedPointer<QByteArray> inp)
 {
-    QString tmp;
+    double tmp = 0;
+    unsigned char command = 0;
     *this << *inp;
     device()->reset();
-
-    while (!atEnd()){
+    *this >> command;
+    while (!atEnd()) {
         *this >> tmp;
-        std::cout << tmp.toStdString() << std::endl;
+        std::cout << tmp << std::endl;
     }
 }

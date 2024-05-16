@@ -19,6 +19,7 @@ FileInput::FileInput(QString filePath)
             QString fileDescript = m_file->readLine();
             bool isFormula = fileDescript.contains("formula");
             if (!isFormula) *this << fileDescript.toLongLong();
+            *this << quint32();
             while (!m_file->atEnd()) {
                 QString tmp = m_file->readLine();
                 bool isOk = false;
